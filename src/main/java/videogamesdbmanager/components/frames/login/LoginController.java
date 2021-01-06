@@ -50,11 +50,7 @@ public class LoginController {
         });
       } else {
         //TODO
-        SwingUtilities.invokeLater(() -> {
-          JFrame roleFrame = new RoleSelection();
-          roleFrame.setVisible(true);
-        });
-        System.out.println("Witaj chuju");
+        System.out.println("Witaj luju");
       }
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);
