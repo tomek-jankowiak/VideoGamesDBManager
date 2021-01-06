@@ -2,6 +2,7 @@ package videogamesdbmanager.components.frames.login;
 
 
 import videogamesdbmanager.application.Application;
+import videogamesdbmanager.components.frames.role.RoleSelection;
 import videogamesdbmanager.error.SqlExceptionHandler;
 
 import javax.swing.*;
@@ -43,12 +44,16 @@ public class LoginController {
       statement.close();
 
       if(userType == null) {
-        /*SwingUtilities.invokeLater(() -> {
-          //TODO
-        });*/
-        System.out.println("chuuj");
+        SwingUtilities.invokeLater(() -> {
+          JFrame roleFrame = new RoleSelection();
+          roleFrame.setVisible(true);
+        });
       } else {
         //TODO
+        SwingUtilities.invokeLater(() -> {
+          JFrame roleFrame = new RoleSelection();
+          roleFrame.setVisible(true);
+        });
         System.out.println("Witaj chuju");
       }
     } catch (SQLException ex) {
