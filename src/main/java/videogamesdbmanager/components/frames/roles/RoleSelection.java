@@ -1,4 +1,4 @@
-package videogamesdbmanager.components.frames.role;
+package videogamesdbmanager.components.frames.roles;
 
 import javax.swing.*;
 
@@ -14,7 +14,7 @@ public class RoleSelection extends JFrame {
 
     this.setContentPane(rolePanel);
     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    //this.setResizable(false);
+    this.setResizable(false);
     this.setLocationRelativeTo(null);
     this.pack();
   }

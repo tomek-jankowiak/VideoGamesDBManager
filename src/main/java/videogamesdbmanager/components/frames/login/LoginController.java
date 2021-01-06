@@ -2,7 +2,7 @@ package videogamesdbmanager.components.frames.login;
 
 
 import videogamesdbmanager.application.Application;
-import videogamesdbmanager.components.frames.role.RoleSelection;
+import videogamesdbmanager.components.frames.roles.RoleSelection;
 import videogamesdbmanager.error.SqlExceptionHandler;
 
 import javax.swing.*;
