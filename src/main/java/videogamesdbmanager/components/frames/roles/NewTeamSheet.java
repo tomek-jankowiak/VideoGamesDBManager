@@ -22,6 +22,7 @@ public class NewTeamSheet extends JFrame {
   }
 
   private void register() {
-    //TODO
+    String name = teamNameField.getText();
+    String region = teamRegionField.getText();
   }
 }

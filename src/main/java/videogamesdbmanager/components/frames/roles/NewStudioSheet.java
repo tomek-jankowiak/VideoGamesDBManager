@@ -20,6 +20,6 @@ public class NewStudioSheet extends JFrame {
   }
 
   private void register() {
-    //TODO
+    String name = studioNameField.getText();
   }
 }

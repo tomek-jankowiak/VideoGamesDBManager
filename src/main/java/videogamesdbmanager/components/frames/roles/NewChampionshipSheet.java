@@ -10,10 +10,12 @@ public class NewChampionshipSheet extends JFrame {
   private JTextField rewardField;
   private JComboBox typeComboBox;
   private JPanel newChampionshipPanel;
+  private String[] types = {"Mistrzostwa indywidualne", "Mistrzostwa drużynowe"};
 
   public NewChampionshipSheet() {
     super("Nowe mistrzostwa");
 
+    this.typeComboBox = new JComboBox(types); // nie wiem czy to działa
     this.setContentPane(newChampionshipPanel);
     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     this.setResizable(false);
@@ -24,6 +26,14 @@ public class NewChampionshipSheet extends JFrame {
   }
 
   private void register() {
-    //TODO
+    String name = nameField.getText();
+    String date = dateField.getText();
+    String localization = localizationField.getText();
+    String reward;
+    if (rewardField.getText().isEmpty())
+      reward = null;
+    else
+      reward = localizationField.getText();
+    String type = types[typeComboBox.getSelectedIndex()];
   }
 }
