@@ -1,15 +1,20 @@
 package videogamesdbmanager.components.frames.roles;
 
+import videogamesdbmanager.controllers.NewUserController;
+
 import javax.swing.*;
+import java.sql.*;
 
 public class RoleSelection extends JFrame {
-  private JButton organizatorMistrzostwButton;
-  private JButton prezesStudiaButton;
-  private JButton menadzerDruzynyButton;
-  private JButton pracownikButton;
+  private JButton organizerButton;
+  private JButton ceoButton;
+  private JButton managerButton;
+  private JButton workerButton;
   private JPanel rolePanel;
 
-  public RoleSelection() {
+  private final NewUserController controller_;
+
+  public RoleSelection(Connection connection, String username) {
     super("Wybór roli");
 
     this.setContentPane(rolePanel);
@@ -17,5 +22,30 @@ public class RoleSelection extends JFrame {
     this.setResizable(false);
     this.setLocationRelativeTo(null);
     this.pack();
+
+    organizerButton.addActionListener(e -> onOrganizer());
+    ceoButton.addActionListener(e -> onCEO());
+    managerButton.addActionListener(e -> onManager());
+    workerButton.addActionListener(e -> onWorker());
+
+    controller_ = new NewUserController(connection, username);
+  }
+
+  private void onOrganizer() {
+    //TODO
+  }
+
+  private void onCEO() {
+    this.setVisible(false);
+    JFrame newCeoFrame = new NewStudioSheet(this, controller_);
+    newCeoFrame.setVisible(true);
+  }
+
+  private void onManager() {
+    //TODO
+  }
+
+  private void onWorker() {
+    //TODO
   }
 }

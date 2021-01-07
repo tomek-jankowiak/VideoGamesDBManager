@@ -16,7 +16,7 @@
           <text value="Wybierz swoją rolę, drogi użytkowniku :)"/>
         </properties>
       </component>
-      <component id="58e6f" class="javax.swing.JButton" binding="pracownikButton" default-binding="true">
+      <component id="58e6f" class="javax.swing.JButton" binding="workerButton">
         <constraints>
           <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
@@ -24,7 +24,7 @@
           <text value="Pracownik"/>
         </properties>
       </component>
-      <component id="a6719" class="javax.swing.JButton" binding="menadzerDruzynyButton" default-binding="true">
+      <component id="a6719" class="javax.swing.JButton" binding="managerButton">
         <constraints>
           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="243" height="30"/>
@@ -34,7 +34,7 @@
           <text value="Menadżer drużyny"/>
         </properties>
       </component>
-      <component id="fa617" class="javax.swing.JButton" binding="prezesStudiaButton" default-binding="true">
+      <component id="fa617" class="javax.swing.JButton" binding="ceoButton">
         <constraints>
           <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="243" height="30"/>
@@ -44,7 +44,7 @@
           <text value="Prezes studia"/>
         </properties>
       </component>
-      <component id="e2e76" class="javax.swing.JButton" binding="organizatorMistrzostwButton" default-binding="true">
+      <component id="e2e76" class="javax.swing.JButton" binding="organizerButton">
         <constraints>
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="243" height="30"/>

@@ -31,8 +31,44 @@ public class NewUserController {
     if(!grantRole("Prezes_rola")) {
       return false;
     }
-    //TODO
-    return true;
+
+    try {
+      PreparedStatement preparedStatement = connection_.prepareStatement(
+        String.format(
+                "BEGIN " +
+                        "%s.Wspolne.DodajPrezesa(?);" +
+                "END;",
+                Application.ownerID
+        )
+      );
+      preparedStatement.setString(1, ceoName);
+      preparedStatement.execute();
+      preparedStatement.close();
+
+      Statement statement = connection_.createStatement();
+      statement.execute("SET ROLE Prezes_rola");
+      statement.close();
+
+      preparedStatement = connection_.prepareStatement(
+        String.format(
+                "BEGIN " +
+                        "%s.Prezes.NoweStudio(?, TO_DATE(?, 'DD-MM-YYYY'), ?);" +
+                "END;",
+                Application.ownerID
+        )
+      );
+      preparedStatement.setString(1, studioName);
+      preparedStatement.setString(2, creationDate);
+      preparedStatement.setString(3, ceoName);
+      preparedStatement.execute();
+      preparedStatement.close();
+
+      return true;
+
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return false;
+    }
   }
 
   public boolean addManager() {

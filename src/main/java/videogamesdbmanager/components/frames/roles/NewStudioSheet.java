@@ -1,25 +1,55 @@
 package videogamesdbmanager.components.frames.roles;
 
+import videogamesdbmanager.controllers.NewUserController;
+
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class NewStudioSheet extends JFrame {
   private JButton registerStudioButton;
   private JTextField studioNameField;
   private JPanel newStudioPanel;
+  private JTextField ceoNameField;
+  private JTextField creationDateField;
 
-  public NewStudioSheet() {
+  private final JFrame parentFrame_;
+  private final NewUserController controller_;
+
+  public NewStudioSheet(JFrame parentFrame, NewUserController controller) {
     super("Nowa drużyna");
 
+    parentFrame_ = parentFrame;
+    controller_ = controller;
+
     this.setContentPane(newStudioPanel);
-    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     this.setResizable(false);
     this.setLocationRelativeTo(null);
     this.pack();
 
-    registerStudioButton.addActionListener(e -> register());
+    registerStudioButton.addActionListener(e -> onRegister());
+
+    addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent e) {
+        onClose();
+      }
+    });
   }
 
-  private void register() {
-    String name = studioNameField.getText();
+  private void onRegister() {
+    String ceoName = ceoNameField.getText();
+    String studioName = studioNameField.getText();
+    String creationDate = creationDateField.getText();
+
+    if(controller_.addCEO(ceoName, studioName, creationDate)) {
+      parentFrame_.dispose();
+      this.dispose();
+    }
+  }
+
+  private void onClose() {
+    dispose();
+    parentFrame_.setVisible(true);
   }
 }
