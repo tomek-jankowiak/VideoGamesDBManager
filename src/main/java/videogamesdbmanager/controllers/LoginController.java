@@ -1,4 +1,4 @@
-package videogamesdbmanager.components.frames.login;
+package videogamesdbmanager.controllers;
 
 
 import videogamesdbmanager.application.Application;
@@ -12,17 +12,16 @@ import java.util.Properties;
 public class LoginController {
 
   private Connection connection_;
-
-  private static final String connectionString_ =
-          "jdbc:oracle:thin:@//admlab2.cs.put.poznan.pl:1521/dblab02_students.cs.put.poznan.pl";
+  private String username_;
 
   public boolean login(String username, String password) {
     Properties connectionProps = new Properties();
     connectionProps.put("user", username);
     connectionProps.put("password", password);
+    username_ = username;
 
     try {
-      connection_ = DriverManager.getConnection(connectionString_,
+      connection_ = DriverManager.getConnection(Application.connectionString,
               connectionProps);
       SwingUtilities.invokeLater(this::successfulLoginCallback);
       return true;
@@ -36,7 +35,7 @@ public class LoginController {
     try {
       Statement statement = connection_.createStatement();
       ResultSet resultSet = statement.executeQuery(
-              String.format("SELECT typ FROM %s.UZYTKOWNICY WHERE id=USER", Application.ownerID)
+              String.format("SELECT %s.Wspolne.PobierzTypUzytkownika FROM dual", Application.ownerID)
       );
       resultSet.next();
       String userType = resultSet.getString(1);
@@ -45,7 +44,7 @@ public class LoginController {
 
       if(userType == null) {
         SwingUtilities.invokeLater(() -> {
-          JFrame roleFrame = new RoleSelection();
+          JFrame roleFrame = new RoleSelection(connection_, username_);
           roleFrame.setVisible(true);
         });
       } else {

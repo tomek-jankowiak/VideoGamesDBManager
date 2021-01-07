@@ -1,5 +1,7 @@
 package videogamesdbmanager.components.frames.login;
 
+import videogamesdbmanager.controllers.LoginController;
+
 import javax.swing.*;
 
 public class LoginFrame extends JFrame {
