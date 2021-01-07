@@ -42,7 +42,9 @@ public class RoleSelection extends JFrame {
   }
 
   private void onManager() {
-    //TODO
+    this.setVisible(false);
+    JFrame newManagerFrame = new NewTeamSheet(this, controller_);
+    newManagerFrame.setVisible(true);
   }
 
   private void onWorker() {

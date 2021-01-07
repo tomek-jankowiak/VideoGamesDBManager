@@ -71,12 +71,75 @@ public class NewUserController {
     }
   }
 
-  public boolean addManager() {
-    if(!grantRole("Menadzer_rola")) {
+  public boolean addManager(String managerName, String teamName, String region, boolean isNewRegion) {
+    if (!grantRole("Menadzer_rola")) {
       return false;
     }
-    //TODO
-    return true;
+
+    try {
+      PreparedStatement preparedStatement = connection_.prepareStatement(
+        String.format(
+                "BEGIN " +
+                        "%s.Wspolne.DodajMenadzera(?);" +
+                        "END;",
+                Application.ownerID
+        )
+      );
+      preparedStatement.setString(1, managerName);
+      preparedStatement.execute();
+      preparedStatement.close();
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return false;
+    }
+
+    if (isNewRegion) {
+      if (!addRegion(region)) {
+        return false;
+      }
+    }
+
+    try {
+      PreparedStatement preparedStatement = connection_.prepareStatement(
+        String.format(
+                "BEGIN " +
+                        "%s.Menadzer.NowaDruzyna(?, ?, ?);" +
+                        "END;",
+                Application.ownerID
+        )
+      );
+      preparedStatement.setString(1, teamName);
+      preparedStatement.setString(2, managerName);
+      preparedStatement.setString(3, region);
+      preparedStatement.execute();
+      preparedStatement.close();
+
+      return true;
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return false;
+    }
+  }
+
+  private boolean addRegion(String regionName) {
+    try {
+      PreparedStatement preparedStatement = connection_.prepareStatement(
+        String.format(
+                "BEGIN " +
+                        "%s.Menadzer.NowyRegion(?);" +
+                        "END;",
+                Application.ownerID
+        )
+      );
+      preparedStatement.setString(1, regionName);
+      preparedStatement.execute();
+      preparedStatement.close();
+
+      return true;
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return false;
+    }
   }
 
   private boolean grantRole(String role) {
