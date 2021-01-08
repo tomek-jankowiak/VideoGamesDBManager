@@ -19,12 +19,38 @@ public class NewUserController {
     username_ = username;
   }
 
-  public boolean addOrganizer() {
+  public boolean addOrganizer(String organizerName) {
     if(!grantRole("Organizator_rola")) {
       return false;
     }
-    //TODO
-    return true;
+
+    try {
+      PreparedStatement preparedStatement = connection_.prepareStatement(
+        String.format(
+                "BEGIN " +
+                        "%s.Wspolne.DodajOrganizatora(?);" +
+                "END;",
+                Application.ownerID
+        )
+      );
+      preparedStatement.setString(1, organizerName);
+      preparedStatement.execute();
+      preparedStatement.close();
+
+      try {
+        Statement statement = connection_.createStatement();
+        statement.execute("SET ROLE Menadzer_rola");
+        statement.close();
+      } catch (SQLException ex) {
+        SqlExceptionHandler.handle(ex);
+        return false;
+      }
+
+      return true;
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return false;
+    }
   }
 
   public boolean addCEO(String ceoName, String studioName, String creationDate) {
@@ -81,13 +107,22 @@ public class NewUserController {
         String.format(
                 "BEGIN " +
                         "%s.Wspolne.DodajMenadzera(?);" +
-                        "END;",
+                "END;",
                 Application.ownerID
         )
       );
       preparedStatement.setString(1, managerName);
       preparedStatement.execute();
       preparedStatement.close();
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return false;
+    }
+
+    try {
+      Statement statement = connection_.createStatement();
+      statement.execute("SET ROLE Menadzer_rola");
+      statement.close();
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);
       return false;
@@ -104,7 +139,7 @@ public class NewUserController {
         String.format(
                 "BEGIN " +
                         "%s.Menadzer.NowaDruzyna(?, ?, ?);" +
-                        "END;",
+                "END;",
                 Application.ownerID
         )
       );
@@ -127,7 +162,7 @@ public class NewUserController {
         String.format(
                 "BEGIN " +
                         "%s.Menadzer.NowyRegion(?);" +
-                        "END;",
+                "END;",
                 Application.ownerID
         )
       );
