@@ -32,7 +32,9 @@ public class RoleSelection extends JFrame {
   }
 
   private void onOrganizer() {
-    //TODO
+    this.setVisible(false);
+    JFrame newOrganizerFrame = new NewOrganizerSheet(this, controller_);
+    newOrganizerFrame.setVisible(true);
   }
 
   private void onCEO() {
