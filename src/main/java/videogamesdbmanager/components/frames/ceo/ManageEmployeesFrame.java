@@ -56,7 +56,7 @@ public class ManageEmployeesFrame extends JFrame{
 
   private void onAddEmployee() {
     SwingUtilities.invokeLater(() -> {
-      JFrame addEmployeeFrame = new AddEmployeeFrame(controller_);
+      JFrame addEmployeeFrame = new AddEmployeeFrame(controller_, this);
       addEmployeeFrame.setVisible(true);
     });
   }
@@ -73,9 +73,10 @@ public class ManageEmployeesFrame extends JFrame{
           employeeParams[i] = null;
         }
       }
-      this.setVisible(false);
-      ModifyEmployeeFrame modifyFrame = new ModifyEmployeeFrame(employeeParams, controller_, this);
-      modifyFrame.setVisible(true);
+      SwingUtilities.invokeLater(() -> {
+        ModifyEmployeeFrame modifyFrame = new ModifyEmployeeFrame(employeeParams, controller_, this);
+        modifyFrame.setVisible(true);
+      });
     }
   }
 

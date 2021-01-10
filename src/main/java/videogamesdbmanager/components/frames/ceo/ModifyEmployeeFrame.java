@@ -61,6 +61,7 @@ public class ModifyEmployeeFrame extends JFrame {
     String department = departmentTextField.getText();
     if (controller_.modifyEmployee(pesel, salary, department)) {
       JOptionPane.showMessageDialog(null, "Zmodyfikowano pracownika");
+      parentFrame_.refreshEmployeesTable();
     }
   }
 
@@ -75,6 +76,5 @@ public class ModifyEmployeeFrame extends JFrame {
   private void onClose() {
     this.dispose();
     parentFrame_.refreshEmployeesTable();
-    parentFrame_.setVisible(true);
   }
 }
