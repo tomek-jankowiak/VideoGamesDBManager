@@ -1,8 +1,10 @@
 package videogamesdbmanager.controllers;
 
 import videogamesdbmanager.application.Application;
+import videogamesdbmanager.components.frames.ceo.CeoMainFrame;
 import videogamesdbmanager.error.SqlExceptionHandler;
 
+import javax.swing.*;
 import java.sql.*;
 import java.util.Properties;
 
@@ -89,8 +91,11 @@ public class NewUserController {
       preparedStatement.execute();
       preparedStatement.close();
 
+      SwingUtilities.invokeLater(() -> {
+        JFrame ceoMainFrame = new CeoMainFrame(connection_);
+        ceoMainFrame.setVisible(true);
+      });
       return true;
-
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);
       return false;
