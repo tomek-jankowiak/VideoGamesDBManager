@@ -15,13 +15,16 @@ public class AddEmployeeFrame extends JFrame{
   private JTextField departmentTextField;
   private JButton addButton;
   private JPanel mainPanel;
+  private JButton closeButton;
 
-  private CeoController controller_;
+  private final CeoController controller_;
+  private final ManageEmployeesFrame parentFrame_;
 
-  public AddEmployeeFrame(CeoController controller) {
+  public AddEmployeeFrame(CeoController controller, ManageEmployeesFrame parentFrame) {
     super("Dodaj pracownika");
 
     controller_ = controller;
+    parentFrame_ = parentFrame;
 
     this.setContentPane(mainPanel);
     this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -35,6 +38,7 @@ public class AddEmployeeFrame extends JFrame{
     });
 
     addButton.addActionListener(e -> onAdd());
+    closeButton.addActionListener(e -> onClose());
   }
 
   private void onAdd() {
@@ -46,8 +50,8 @@ public class AddEmployeeFrame extends JFrame{
             empDateTextField.getText(),
             departmentTextField.getText())
     ) {
-      this.dispose();
       JOptionPane.showMessageDialog(null, "Dodano pracownika");
+      parentFrame_.refreshEmployeesTable();
     }
 
   }
