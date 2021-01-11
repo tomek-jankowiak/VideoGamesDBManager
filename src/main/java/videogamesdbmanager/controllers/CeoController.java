@@ -187,7 +187,7 @@ public class CeoController {
       Statement statement = connection_.createStatement();
       return statement.executeQuery(
         String.format(
-                "SELECT pesel, imie, nazwisko, placa, data_zatrudnienia, dzial " +
+                "SELECT pesel, imie, nazwisko, placa, TO_CHAR(data_zatrudnienia, 'YYYY-MM-DD'), dzial " +
                 "FROM %s.pracownicy_studia " +
                 "WHERE studio_nazwa = '%s'",
                 Application.ownerID, company
@@ -316,7 +316,9 @@ public class CeoController {
     try {
       Statement statement = connection_.createStatement();
       return statement.executeQuery(
-              String.format("SELECT * FROM %s.gry %s", Application.ownerID, filter)
+        String.format("SELECT tytul, TO_CHAR(data_wydania, 'YYYY-MM-DD'), kategoria_wiekowa, nazwa_gatunku, " +
+                      "studio_nazwa, budzet, box_office " +
+                      "FROM %s.gry %s", Application.ownerID, filter)
       );
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);

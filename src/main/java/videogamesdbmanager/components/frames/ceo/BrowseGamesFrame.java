@@ -44,7 +44,7 @@ public class BrowseGamesFrame extends JFrame {
   }
 
   public void refreshGamesTable(boolean allGames) {
-    String[] columnNames = {"Tytuł", "Data wydania", "Kategoria wiekowa", "Box office", "Budżet", "Studio", "Gatunek"};
+    String[] columnNames = {"Tytuł", "Data wydania", "Kategoria wiekowa", "Gatunek", "Studio", "Budżet", "Box office"};
     DefaultTableModel model = (DefaultTableModel)gamesTable.getModel();
     model.setRowCount(0);
     model.setColumnIdentifiers(columnNames);
