@@ -26,6 +26,7 @@ public class AddEmployeeFrame extends JFrame{
     controller_ = controller;
     parentFrame_ = parentFrame;
 
+    empDateTextField.setText(controller_.getSysdate());
     this.setContentPane(mainPanel);
     this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     this.setLocationRelativeTo(null);
