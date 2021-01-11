@@ -43,6 +43,70 @@ public class CeoController {
     }
   }
 
+  public int getCompanyEmployeesNumber() {
+    try {
+      int number;
+
+      Statement statement = connection_.createStatement();
+      ResultSet resultSet = statement.executeQuery(
+        String.format("SELECT COUNT(*) " +
+                      "FROM %s.pracownicy_studia " +
+                      "WHERE studio_nazwa = '%s'",
+                      Application.ownerID, getCompanyName())
+      );
+      resultSet.next();
+      number = resultSet.getInt(1);
+      resultSet.close();
+
+      return number;
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return 0;
+    }
+  }
+
+  public int getCompanyGamesNumber() {
+    try {
+      int number;
+
+      Statement statement = connection_.createStatement();
+      ResultSet resultSet = statement.executeQuery(
+        String.format("SELECT COUNT(*) " +
+                      "FROM %s.gry " +
+                      "WHERE studio_nazwa = '%s'",
+                      Application.ownerID, getCompanyName())
+      );
+      resultSet.next();
+      number = resultSet.getInt(1);
+      resultSet.close();
+
+      return number;
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return 0;
+    }
+  }
+
+  public double getCompanyIncome() {
+    try {
+      double income;
+      Statement statement = connection_.createStatement();
+      ResultSet resultSet = statement.executeQuery(
+        String.format("SELECT SUM(nvl(box_office, 0)) " +
+                      "FROM %s.gry " +
+                      "WHERE studio_nazwa = '%s'",
+                      Application.ownerID, getCompanyName())
+      );
+      resultSet.next();
+      income = resultSet.getDouble(1);
+      resultSet.close();
+
+      return income;
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return 0;
+    }
+  }
   public boolean addEmployee(String pesel, String name, String surname,
                              Double salary, String empDate, String department) {
     String company = getCompanyName();
@@ -153,10 +217,9 @@ public class CeoController {
   public ResultSet getGameTypes() {
     try {
       Statement statement = connection_.createStatement();
-      ResultSet resultSet = statement.executeQuery(
+      return statement.executeQuery(
         String.format("SELECT nazwa_gatunku FROM %s.gatunki ORDER BY 1", Application.ownerID)
       );
-      return resultSet;
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);
       return null;

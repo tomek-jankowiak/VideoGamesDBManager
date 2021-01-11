@@ -37,6 +37,7 @@ public class CeoMainFrame extends JFrame {
     manageEmployeesButton.addActionListener(e -> onManage());
     releaseGameButton.addActionListener(e -> onRelease());
     browseGamesButton.addActionListener(e -> onBrowse());
+    summaryButton.addActionListener(e -> onSummary());
     deleteAccountButton.addActionListener(e -> onDelete());
     logoutButton.addActionListener(e -> onClose());
   }
@@ -59,6 +60,13 @@ public class CeoMainFrame extends JFrame {
     SwingUtilities.invokeLater(() -> {
       JFrame browseGamesFrame = new BrowseGamesFrame(controller_);
       browseGamesFrame.setVisible(true);
+    });
+  }
+
+  private void onSummary() {
+    SwingUtilities.invokeLater(() -> {
+      JFrame summaryFrame = new SummaryFrame(controller_);
+      summaryFrame.setVisible(true);
     });
   }
 
