@@ -7,13 +7,17 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.Connection;
 
-public class CeoMainFrame extends JFrame{
+public class CeoMainFrame extends JFrame {
   private JPanel mainPanel;
   private JButton manageEmployeesButton;
   private JButton releaseGameButton;
   private JButton deleteAccountButton;
+  private JButton browseGamesButton;
+  private JButton summaryButton;
+  private JButton logoutButton;
 
-  private CeoController controller_;
+  private final CeoController controller_;
+
   public CeoMainFrame(Connection connection) {
     super("Zarządzanie studiem");
 
@@ -32,7 +36,9 @@ public class CeoMainFrame extends JFrame{
 
     manageEmployeesButton.addActionListener(e -> onManage());
     releaseGameButton.addActionListener(e -> onRelease());
+    browseGamesButton.addActionListener(e -> onBrowse());
     deleteAccountButton.addActionListener(e -> onDelete());
+    logoutButton.addActionListener(e -> onClose());
   }
 
   private void onManage() {
@@ -43,16 +49,28 @@ public class CeoMainFrame extends JFrame{
   }
 
   private void onRelease() {
+    SwingUtilities.invokeLater(() -> {
+      JFrame releaseGameFrame = new ReleaseGameFrame(controller_);
+      releaseGameFrame.setVisible(true);
+    });
+  }
 
+  private void onBrowse() {
+    SwingUtilities.invokeLater(() -> {
+      JFrame browseGamesFrame = new BrowseGamesFrame(controller_);
+      browseGamesFrame.setVisible(true);
+    });
   }
 
   private void onDelete() {
-    if(controller_.deleteAccount()) {
+    if (controller_.deleteAccount()) {
       this.dispose();
     }
   }
 
   private void onClose() {
-    this.dispose();
+    if (controller_.closeConnection()) {
+      this.dispose();
+    }
   }
 }

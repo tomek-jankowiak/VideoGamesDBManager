@@ -4,8 +4,11 @@ package videogamesdbmanager.controllers;
 import videogamesdbmanager.application.Application;
 import videogamesdbmanager.error.SqlExceptionHandler;
 
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.desktop.AppForegroundListener;
 import java.sql.*;
+import java.text.SimpleDateFormat;
 
 public class CeoController {
 
@@ -15,8 +18,13 @@ public class CeoController {
     connection_ = connection;
   }
 
-  public boolean addEmployee(String pesel, String name, String surname,
-                             Double salary, String empDate, String department) {
+  public String getSysdate() {
+    SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
+    Date date = new Date(System.currentTimeMillis());
+    return formatter.format((date));
+  }
+
+  public String getCompanyName() {
     String company;
 
     try {
@@ -28,10 +36,16 @@ public class CeoController {
       company = resultSet.getString(1);
       resultSet.close();
       statement.close();
+      return company;
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);
-      return false;
+      return null;
     }
+  }
+
+  public boolean addEmployee(String pesel, String name, String surname,
+                             Double salary, String empDate, String department) {
+    String company = getCompanyName();
 
     try {
       PreparedStatement preparedStatement = connection_.prepareStatement(
@@ -105,14 +119,8 @@ public class CeoController {
 
   public ResultSet getEmployees() {
     try {
+      String company = getCompanyName();
       Statement statement = connection_.createStatement();
-      ResultSet resultSet = statement.executeQuery(
-              String.format("SELECT %s.Prezes.PobierzNazweStudia FROM dual", Application.ownerID)
-      );
-      resultSet.next();
-      String company = resultSet.getString(1);
-      resultSet.close();
-
       return statement.executeQuery(
         String.format(
                 "SELECT pesel, imie, nazwisko, placa, data_zatrudnienia, dzial " +
@@ -142,6 +150,127 @@ public class CeoController {
     }
   }
 
+  public ResultSet getGameTypes() {
+    try {
+      Statement statement = connection_.createStatement();
+      ResultSet resultSet = statement.executeQuery(
+        String.format("SELECT nazwa_gatunku FROM %s.gatunki ORDER BY 1", Application.ownerID)
+      );
+      return resultSet;
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return null;
+    }
+  }
+
+  public void setGameTypesComboBox(JComboBox<String> comboBox) {
+    try {
+      ResultSet types = getGameTypes();
+
+      while(types.next()) {
+        comboBox.addItem(types.getString(1));
+      }
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+    }
+  }
+
+  public boolean addGameType(String typeName) {
+    try {
+      PreparedStatement preparedStatement = connection_.prepareStatement(
+        String.format(
+                "BEGIN " +
+                        "%s.Prezes.NowyGatunek(?);" +
+                "END;",
+                Application.ownerID
+        )
+      );
+      preparedStatement.setString(1, typeName);
+      preparedStatement.execute();
+      preparedStatement.close();
+
+      return true;
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return false;
+    }
+  }
+
+  public boolean releaseGame(String title, String releaseDate, String gameType,
+                             String ageCat, String boxOffice, String budget) {
+    try {
+      String company = getCompanyName();
+      PreparedStatement preparedStatement = connection_.prepareStatement(
+        String.format(
+                "BEGIN " +
+                        "%s.Prezes.WydajGre(?, TO_DATE(?, 'DD-MM-YYYY'), ?, ?, ?, ?, ?);" +
+                "END;",
+                Application.ownerID
+        )
+      );
+      preparedStatement.setString(1, title);
+      preparedStatement.setString(2, releaseDate);
+      preparedStatement.setString(3, gameType);
+      preparedStatement.setString(4, company);
+      if (!ageCat.isEmpty()) {
+        preparedStatement.setInt(5, Integer.parseInt(ageCat));
+      } else {
+        preparedStatement.setString(5, null);
+      }
+      if (!boxOffice.isEmpty()) {
+        preparedStatement.setDouble(6, Double.parseDouble(boxOffice));
+      } else {
+        preparedStatement.setString(6, null);
+      }
+      if (!budget.isEmpty()) {
+        preparedStatement.setDouble(7, Double.parseDouble(budget));
+      } else {
+        preparedStatement.setString(7, null);
+      }
+      preparedStatement.execute();
+      preparedStatement.close();
+
+      return true;
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return false;
+    }
+  }
+
+  public ResultSet getGames(boolean allGames) {
+    String filter;
+    if (!allGames) {
+      filter = String.format("WHERE studio_nazwa = '%s'", getCompanyName());
+    } else {
+      filter = "";
+    }
+
+    try {
+      Statement statement = connection_.createStatement();
+      return statement.executeQuery(
+              String.format("SELECT * FROM %s.gry %s", Application.ownerID, filter)
+      );
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return null;
+    }
+  }
+
+  public void setGamesTable(DefaultTableModel tableModel, boolean allGames) {
+    ResultSet gamesSet = getGames(allGames);
+    try {
+      while (gamesSet.next()) {
+        Object[] objects = new Object[7];
+        for (int i = 0; i < 7; i++) {
+          objects[i] = gamesSet.getObject(i + 1);
+        }
+        tableModel.addRow(objects);
+      }
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+    }
+  }
+
   public boolean deleteAccount() {
     try {
       Statement statement = connection_.createStatement();
@@ -161,4 +290,13 @@ public class CeoController {
     }
   }
 
+  public boolean closeConnection() {
+    try {
+      connection_.close();
+      return true;
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return false;
+    }
+  }
 }
