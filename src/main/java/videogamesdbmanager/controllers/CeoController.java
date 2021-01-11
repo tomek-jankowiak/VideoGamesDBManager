@@ -238,17 +238,22 @@ public class CeoController {
     }
   }
 
-  public boolean addGameType(String typeName) {
+  public boolean addGameType(String typeName, String superType) {
     try {
       PreparedStatement preparedStatement = connection_.prepareStatement(
         String.format(
                 "BEGIN " +
-                        "%s.Prezes.NowyGatunek(?);" +
+                        "%s.Prezes.NowyGatunek(?, ?);" +
                 "END;",
                 Application.ownerID
         )
       );
       preparedStatement.setString(1, typeName);
+      if (superType.equals("<BRAK NADGATUNKU>")) {
+        preparedStatement.setString(2, null);
+      } else {
+        preparedStatement.setString(2, superType);
+      }
       preparedStatement.execute();
       preparedStatement.close();
 
