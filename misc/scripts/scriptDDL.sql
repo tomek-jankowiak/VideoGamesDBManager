@@ -55,9 +55,9 @@ ALTER TABLE gatunki ADD CONSTRAINT gatunki_pk PRIMARY KEY ( nazwa_gatunku );
 CREATE TABLE gry (
     tytul              VARCHAR2(50) NOT NULL,
     data_wydania       DATE NOT NULL,
-    kategoria_wiekowa  NUMBER(3, 2),
-    box_office         NUMBER(7, 2),
-    budzet             NUMBER(7, 2),
+    kategoria_wiekowa  NUMBER(3, 0),
+    box_office         NUMBER(10, 2),
+    budzet             NUMBER(10, 2),
     studio_nazwa       VARCHAR2(50) NOT NULL,
 	nazwa_gatunku	   VARCHAR2(50) NOT NULL
 );
