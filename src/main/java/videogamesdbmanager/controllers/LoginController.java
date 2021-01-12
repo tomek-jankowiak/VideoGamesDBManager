@@ -2,6 +2,7 @@ package videogamesdbmanager.controllers;
 
 
 import videogamesdbmanager.application.Application;
+import videogamesdbmanager.components.frames.ceo.CeoMainFrame;
 import videogamesdbmanager.components.frames.roles.RoleSelection;
 import videogamesdbmanager.error.SqlExceptionHandler;
 
@@ -48,8 +49,13 @@ public class LoginController {
           roleFrame.setVisible(true);
         });
       } else {
-        //TODO
-        System.out.println("Witaj luju");
+        switch (userType) {
+          case "PREZES":
+            SwingUtilities.invokeLater(() -> {
+              JFrame ceoMainFrame = new CeoMainFrame(connection_);
+              ceoMainFrame.setVisible(true);
+            });
+        }
       }
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);

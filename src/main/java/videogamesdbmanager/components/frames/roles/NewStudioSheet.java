@@ -17,7 +17,7 @@ public class NewStudioSheet extends JFrame {
   private final NewUserController controller_;
 
   public NewStudioSheet(JFrame parentFrame, NewUserController controller) {
-    super("Nowa drużyna");
+    super("Nowe studio");
 
     parentFrame_ = parentFrame;
     controller_ = controller;
