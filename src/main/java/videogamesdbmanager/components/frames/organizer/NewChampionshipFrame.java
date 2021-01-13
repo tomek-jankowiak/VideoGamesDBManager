@@ -1,39 +1,71 @@
 package videogamesdbmanager.components.frames.organizer;
 
-import javax.swing.*;
+import videogamesdbmanager.controllers.OrganizerController;
 
-public class NewChampionshipSheet extends JFrame {
-  private JButton registerCsButton;
+import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.Objects;
+
+public class NewChampionshipFrame extends JFrame {
+  private JButton registerButton;
   private JTextField dateField;
   private JTextField nameField;
   private JTextField localizationField;
-  private JTextField rewardField;
-  private JComboBox typeComboBox;
-  private JPanel newChampionshipPanel;
-  private String[] types = {"Mistrzostwa indywidualne", "Mistrzostwa drużynowe"};
+  private JTextField prizeField;
+  private JComboBox<String> typeComboBox;
+  private JPanel mainPanel;
+  private JButton closeButton;
+  private JComboBox<String> gameComboBox;
 
-  public NewChampionshipSheet() {
+  private final OrganizerController controller_;
+
+  public NewChampionshipFrame(OrganizerController controller) {
     super("Nowe mistrzostwa");
 
-    this.typeComboBox = new JComboBox(types); // nie wiem czy to działa
-    this.setContentPane(newChampionshipPanel);
+    controller_ = controller;
+
+    fillGameComboBox();
+    this.setContentPane(mainPanel);
     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     this.setResizable(false);
     this.setLocationRelativeTo(null);
     this.pack();
 
-    registerCsButton.addActionListener(e -> register());
+    this.addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent e) {
+        onClose();
+      }
+    });
+
+    registerButton.addActionListener(e -> onRegister());
+    closeButton.addActionListener(e -> onClose());
   }
 
-  private void register() {
-    String name = nameField.getText();
-    String date = dateField.getText();
-    String localization = localizationField.getText();
-    String reward;
-    if (rewardField.getText().isEmpty())
-      reward = null;
-    else
-      reward = localizationField.getText();
-    String type = types[typeComboBox.getSelectedIndex()];
+  private void fillGameComboBox() {
+    controller_.setGamesComboBox(gameComboBox);
+  }
+
+  private void onRegister() {
+    String type;
+    if (Objects.equals(typeComboBox.getSelectedItem(), "Indywidualne")) {
+      type = "i";
+    } else {
+      type = "d";
+    }
+
+    if (controller_.addChampionships(nameField.getText(),
+            dateField.getText(),
+            localizationField.getText(),
+            type,
+            Objects.requireNonNull(gameComboBox.getSelectedItem()).toString(),
+            prizeField.getText()
+            )) {
+      JOptionPane.showMessageDialog(null, "Zarejestrowano mistrzostwa");
+    }
+  }
+
+  private void onClose() {
+    this.dispose();
   }
 }

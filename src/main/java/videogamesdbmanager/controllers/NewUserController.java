@@ -2,6 +2,7 @@ package videogamesdbmanager.controllers;
 
 import videogamesdbmanager.application.Application;
 import videogamesdbmanager.components.frames.ceo.CeoMainFrame;
+import videogamesdbmanager.components.frames.organizer.OrganizerMainFrame;
 import videogamesdbmanager.error.SqlExceptionHandler;
 
 import javax.swing.*;
@@ -47,6 +48,11 @@ public class NewUserController {
         SqlExceptionHandler.handle(ex);
         return false;
       }
+
+      SwingUtilities.invokeLater(() -> {
+        JFrame organizerMainFrame = new OrganizerMainFrame(connection_);
+        organizerMainFrame.setVisible(true);
+      });
 
       return true;
     } catch (SQLException ex) {
