@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public class NewChampionshipFrame extends JFrame {
   private JButton registerButton;
-  private JTextField dateField;
+  private JTextField beginDateField;
   private JTextField nameField;
   private JTextField localizationField;
   private JTextField prizeField;
@@ -17,6 +17,7 @@ public class NewChampionshipFrame extends JFrame {
   private JPanel mainPanel;
   private JButton closeButton;
   private JComboBox<String> gameComboBox;
+  private JTextField endDateField;
 
   private final OrganizerController controller_;
 
@@ -54,7 +55,8 @@ public class NewChampionshipFrame extends JFrame {
     }
 
     if (controller_.addChampionships(nameField.getText(),
-            dateField.getText(),
+            beginDateField.getText(),
+            endDateField.getText(),
             localizationField.getText(),
             type,
             Objects.requireNonNull(gameComboBox.getSelectedItem()).toString(),

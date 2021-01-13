@@ -14,6 +14,7 @@ public class OrganizerMainFrame extends JFrame {
   private JButton browseChampionshipButton;
   private JButton summaryButton;
   private JButton deleteAccountButton;
+  private JButton zarządzajMistrzostwamiButton;
 
   private final OrganizerController controller_;
 
@@ -47,7 +48,10 @@ public class OrganizerMainFrame extends JFrame {
   }
 
   private void onBrowse() {
-
+    SwingUtilities.invokeLater(() -> {
+      BrowseChampionshipsFrame browseFrame = new BrowseChampionshipsFrame(controller_);
+      browseFrame.setVisible(true);
+    });
   }
 
   private void onDelete() {
