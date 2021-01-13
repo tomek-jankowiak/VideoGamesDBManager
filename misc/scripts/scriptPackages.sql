@@ -65,13 +65,20 @@ END Menadzer;
 
 CREATE OR REPLACE PACKAGE Organizator AS
 	PROCEDURE NoweMistrzostwa(
-		nazwa IN mistrzostwa.nazwa%TYPE,
-		data IN mistrzostwa.data%TYPE,
-		organizator IN mistrzostwa.organizator%TYPE,
-		lokalizacja IN mistrzostwa.lokalizacja%TYPE,
-		typ IN CHAR,
-		gra IN gry.tytul%TYPE,
-		nagroda IN mistrzostwa.nagroda%TYPE DEFAULT NULL);
+		pNazwa IN mistrzostwa.nazwa%TYPE,
+		pData_begin IN mistrzostwa.data_begin%TYPE,
+		pData_end IN mistrzostwa.data_end%TYPE,
+		pOrganizator IN mistrzostwa.organizator%TYPE,
+		pLokalizacja IN mistrzostwa.lokalizacja%TYPE,
+		pTyp IN CHAR,
+		pGra IN gry.tytul%TYPE,
+		pNagroda IN mistrzostwa.nagroda%TYPE DEFAULT NULL);
+		
+	PROCEDURE AktualizujMistrzostwa(
+		pNazwa IN mistrzostwa.nazwa%TYPE,
+		pData_begin IN mistrzostwa.data_begin%TYPE,
+		pData_end IN mistrzostwa.data_end%TYPE,
+		pStatus IN mistrzostwa.status%TYPE);
 		
 	FUNCTION PobierzNazweOrganizatora
 		RETURN VARCHAR2;
@@ -81,20 +88,49 @@ END Organizator;
 
 CREATE OR REPLACE PACKAGE BODY Organizator AS
 	PROCEDURE NoweMistrzostwa(
-		nazwa IN mistrzostwa.nazwa%TYPE,
-		data IN mistrzostwa.data%TYPE,
-		organizator IN mistrzostwa.organizator%TYPE,
-		lokalizacja IN mistrzostwa.lokalizacja%TYPE,
-		typ IN CHAR,
-		gra IN gry.tytul%TYPE,
-		nagroda IN mistrzostwa.nagroda%TYPE DEFAULT NULL) AS
-	BEGIN 
-		INSERT INTO mistrzostwa VALUES(nazwa, data, organizator, lokalizacja, nagroda, gra);
-		IF typ = 'i' THEN
-			INSERT INTO mistrzostwa_indywidualne VALUES(nazwa, data);
-		ELSIF typ = 'd' THEN
-			INSERT INTO mistrzostwa_druzynowe VALUES(nazwa, data);
+		pNazwa IN mistrzostwa.nazwa%TYPE,
+		pData_begin IN mistrzostwa.data_begin%TYPE,
+		pData_end IN mistrzostwa.data_end%TYPE,
+		pOrganizator IN mistrzostwa.organizator%TYPE,
+		pLokalizacja IN mistrzostwa.lokalizacja%TYPE,
+		pTyp IN CHAR,
+		pGra IN gry.tytul%TYPE,
+		pNagroda IN mistrzostwa.nagroda%TYPE DEFAULT NULL) AS
+		vStatus mistrzostwa.status%TYPE;
+	BEGIN
+		IF CURRENT_DATE - pData_begin < 0 THEN
+			vStatus := 'przed rozpoczęciem';
+		ELSIF pData_end IS NOT NULL THEN
+			IF CURRENT_DATE - pData_end < 0 THEN
+				vStatus := 'trwają';
+			ELSE
+				vStatus := 'zakończone';
+			END IF;
+		ELSE
+			vStatus := 'trwają';
 		END IF;
+		
+		INSERT INTO mistrzostwa 
+		VALUES(pNazwa, pData_begin, pData_end, pOrganizator, pLokalizacja, 
+                pNagroda, pGra, vStatus);
+		
+		IF pTyp = 'i' THEN
+			INSERT INTO mistrzostwa_indywidualne VALUES(pNazwa, pData_begin);
+		ELSIF pTyp = 'd' THEN
+			INSERT INTO mistrzostwa_druzynowe VALUES(pNazwa, pData_begin);
+		END IF;
+	END;
+	
+	PROCEDURE AktualizujMistrzostwa(
+		pNazwa IN mistrzostwa.nazwa%TYPE,
+		pData_begin IN mistrzostwa.data_begin%TYPE,
+		pData_end IN mistrzostwa.data_end%TYPE,
+		pStatus IN mistrzostwa.status%TYPE) AS
+	BEGIN
+		UPDATE mistrzostwa
+		SET data_end = pData_end,
+			status = pStatus
+		WHERE nazwa = pNazwa AND data_begin = pData_begin;
 	END;
 	
 	FUNCTION PobierzNazweOrganizatora
