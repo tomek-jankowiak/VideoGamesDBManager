@@ -15,5 +15,6 @@ GRANT SELECT ON regiony TO Menadzer_rola;
 
 CREATE ROLE Organizator_rola;
 GRANT EXECUTE ON Organizator TO Organizator_rola;
+GRANT SELECT ON gry TO Organizator_rola;
 
 GRANT EXECUTE ON Wspolne TO PUBLIC;
