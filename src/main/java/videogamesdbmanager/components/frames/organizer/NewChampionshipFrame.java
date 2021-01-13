@@ -27,8 +27,7 @@ public class NewChampionshipFrame extends JFrame {
 
     fillGameComboBox();
     this.setContentPane(mainPanel);
-    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    this.setResizable(false);
+    this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
     this.setLocationRelativeTo(null);
     this.pack();
 
