@@ -1,4 +1,4 @@
-package videogamesdbmanager.components.frames.roles;
+package videogamesdbmanager.components.frames.organizer;
 
 import javax.swing.*;
 

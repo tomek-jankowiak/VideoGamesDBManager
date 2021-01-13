@@ -73,6 +73,9 @@ CREATE OR REPLACE PACKAGE Organizator AS
 		gra IN gry.tytul%TYPE,
 		nagroda IN mistrzostwa.nagroda%TYPE DEFAULT NULL);
 		
+	FUNCTION PobierzNazweOrganizatora
+		RETURN VARCHAR2;
+		
 END Organizator;
 /
 
@@ -93,6 +96,17 @@ CREATE OR REPLACE PACKAGE BODY Organizator AS
 			INSERT INTO mistrzostwa_druzynowe VALUES(nazwa, data);
 		END IF;
 	END;
+	
+	FUNCTION PobierzNazweOrganizatora
+		RETURN VARCHAR2 AS
+		vNazwa uzytkownicy.nazwa_uzytkownika%TYPE;
+	BEGIN
+		SELECT nazwa_uzytkownika
+		INTO vNazwa
+		FROM uzytkownicy
+		WHERE id = USER;
+		RETURN vNazwa;
+	END;		
 
 END Organizator;
 /

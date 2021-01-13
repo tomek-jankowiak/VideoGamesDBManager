@@ -85,7 +85,7 @@ CREATE TABLE mistrzostwa (
     data         DATE NOT NULL,
     organizator  VARCHAR2(70) NOT NULL,
     lokalizacja  VARCHAR2(50) NOT NULL,
-    nagroda      NUMBER(7, 2),
+    nagroda      NUMBER(10, 2),
     gra_tytul    VARCHAR2(50) NOT NULL
 );
 
