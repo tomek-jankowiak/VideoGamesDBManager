@@ -1,4 +1,5 @@
 DROP SEQUENCE id_druzyny_SEQ;
+DROP SEQUENCE id_mistrzostw_SEQ;
 DROP INDEX gra_box_office_idx;
 DROP INDEX gra_kat_wiek_bmp_idx;
 DROP INDEX druzyna_gra_bmp_idx;
@@ -19,6 +20,7 @@ DROP TABLE pracownicy_studia;
 DROP TABLE studia;
 
 CREATE SEQUENCE id_druzyny_SEQ START WITH 1;
+CREATE SEQUENCE id_mistrzostw_SEQ START WITH 1;
 
 CREATE TABLE uzytkownicy (
 	id  				  VARCHAR2(9) NOT NULL,
@@ -38,12 +40,10 @@ CREATE TABLE druzyny (
 ALTER TABLE druzyny ADD CONSTRAINT druzyny_pk PRIMARY KEY ( id );
 
 CREATE TABLE mistrzostwa_druzynowe (
-    nazwa  		VARCHAR2(50) NOT NULL,
-    data_begin  DATE NOT NULL
+    id	NUMBER(3, 0)
 );
 
-ALTER TABLE mistrzostwa_druzynowe ADD CONSTRAINT druzynowe_pk PRIMARY KEY ( nazwa,
-                                                                data_begin );
+ALTER TABLE mistrzostwa_druzynowe ADD CONSTRAINT druzynowe_pk PRIMARY KEY ( id );
 
 CREATE TABLE gatunki (
     nazwa_gatunku          VARCHAR2(50) NOT NULL,
@@ -73,14 +73,13 @@ ALTER TABLE gry_na_platformach ADD CONSTRAINT gry_na_platformach_pk PRIMARY KEY 
                                                                                 platforma_nazwa_platformy );
 
 CREATE TABLE mistrzostwa_indywidualne (
-    nazwa  		VARCHAR2(50) NOT NULL,
-    data_begin  DATE NOT NULL
+    id	NUMBER(3, 0)
 );
 
-ALTER TABLE mistrzostwa_indywidualne ADD CONSTRAINT indywidualne_pk PRIMARY KEY ( nazwa,
-                                                                      data_begin );
+ALTER TABLE mistrzostwa_indywidualne ADD CONSTRAINT indywidualne_pk PRIMARY KEY ( id );
 
 CREATE TABLE mistrzostwa (
+	id			 NUMBER (3, 0),
     nazwa        VARCHAR2(50) NOT NULL,
     data_begin   DATE NOT NULL,
 	data_end	 DATE,
@@ -92,8 +91,7 @@ CREATE TABLE mistrzostwa (
 	status		 VARCHAR2(30)
 );
 
-ALTER TABLE mistrzostwa ADD CONSTRAINT mistrzostwa_pk PRIMARY KEY ( nazwa,
-                                                                    data_begin );
+ALTER TABLE mistrzostwa ADD CONSTRAINT mistrzostwa_pk PRIMARY KEY ( id );
 																	
 
 CREATE TABLE platformy (
@@ -129,28 +127,25 @@ CREATE TABLE studia (
 ALTER TABLE studia ADD CONSTRAINT studia_pk PRIMARY KEY ( nazwa );
 
 CREATE TABLE udzialy_druzynowe (
-    wynik            NUMBER(3, 1),
+    wynik            NUMBER(3, 0),
+	nagroda			 NUMBER(10, 2),
     druzyna_id       NUMBER(3, 0) NOT NULL,
-    druzynowe_nazwa  VARCHAR2(50) NOT NULL,
-    druzynowe_data   DATE NOT NULL
+    druzynowe_id	 NUMBER(3, 0) NOT NULL
 );
 
 ALTER TABLE udzialy_druzynowe
     ADD CONSTRAINT udzialy_druzynowe_pk PRIMARY KEY ( druzyna_id,
-                                                     druzynowe_nazwa,
-                                                     druzynowe_data );
+                                                      druzynowe_id);
 
 CREATE TABLE udzialy_indywidualne (
-    wynik               NUMBER(3, 1),
-    indywidualne_nazwa  VARCHAR2(50) NOT NULL,
-    indywidualne_data   DATE NOT NULL,
+    wynik               NUMBER(3, 0),
+    indywidualne_id		NUMBER(3, 0),
     zawodnik_pseudonim  VARCHAR2(50) NOT NULL
 );
 
 ALTER TABLE udzialy_indywidualne
-    ADD CONSTRAINT udzialy_indywidualne_pk PRIMARY KEY ( indywidualne_nazwa,
-                                                        indywidualne_data,
-                                                        zawodnik_pseudonim );
+    ADD CONSTRAINT udzialy_indywidualne_pk PRIMARY KEY ( indywidualne_id,
+                                                         zawodnik_pseudonim );
 
 CREATE TABLE zawodnicy (
     pseudonim       VARCHAR2(50) NOT NULL,
@@ -174,10 +169,8 @@ ALTER TABLE druzyny
 		ON DELETE CASCADE;
 		
 ALTER TABLE mistrzostwa_druzynowe
-    ADD CONSTRAINT druzynowe_mistrzostwa_fk FOREIGN KEY ( nazwa,
-                                                          data_begin )
-        REFERENCES mistrzostwa ( nazwa,
-								 data_begin )
+    ADD CONSTRAINT druzynowe_mistrzostwa_fk FOREIGN KEY ( id )
+        REFERENCES mistrzostwa ( id )
 		ON DELETE CASCADE;
 
 ALTER TABLE gatunki
@@ -201,10 +194,8 @@ ALTER TABLE gry
         REFERENCES studia ( nazwa );
 
 ALTER TABLE mistrzostwa_indywidualne
-    ADD CONSTRAINT indywidualne_mistrzostwa_fk FOREIGN KEY ( nazwa,
-                                                             data_begin )
-        REFERENCES mistrzostwa ( nazwa,
-                                 data_begin )
+    ADD CONSTRAINT indywidualne_mistrzostwa_fk FOREIGN KEY ( id )
+        REFERENCES mistrzostwa ( id )
 		ON DELETE CASCADE;
 
 ALTER TABLE mistrzostwa
@@ -232,17 +223,13 @@ ALTER TABLE udzialy_druzynowe
 		ON DELETE CASCADE;
 
 ALTER TABLE udzialy_druzynowe
-    ADD CONSTRAINT udzial_druz_mist_druz_fk FOREIGN KEY ( druzynowe_nazwa,
-                                                          druzynowe_data )
-        REFERENCES mistrzostwa_druzynowe ( nazwa,
-										   data_begin )
+    ADD CONSTRAINT udzial_druz_mist_druz_fk FOREIGN KEY ( druzynowe_id )
+        REFERENCES mistrzostwa_druzynowe ( id )
 		ON DELETE CASCADE;
 
 ALTER TABLE udzialy_indywidualne
-    ADD CONSTRAINT udzial_ind_mist_ind_fk FOREIGN KEY ( indywidualne_nazwa,
-                                                        indywidualne_data )
-        REFERENCES mistrzostwa_indywidualne ( nazwa,
-											  data_begin )
+    ADD CONSTRAINT udzial_ind_mist_ind_fk FOREIGN KEY ( indywidualne_id )
+        REFERENCES mistrzostwa_indywidualne ( id )
 		ON DELETE CASCADE;
 
 ALTER TABLE udzialy_indywidualne

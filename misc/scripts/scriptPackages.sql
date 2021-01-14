@@ -91,6 +91,7 @@ CREATE OR REPLACE PACKAGE Organizator AS
 		pNagroda IN mistrzostwa.nagroda%TYPE DEFAULT NULL);
 		
 	PROCEDURE EdytujMistrzostwa(
+		pId IN mistrzostwa.id%TYPE,
 		pNazwa IN mistrzostwa.nazwa%TYPE,
 		pData_begin IN mistrzostwa.data_begin%TYPE,
 		pData_end IN mistrzostwa.data_end%TYPE,
@@ -121,8 +122,11 @@ CREATE OR REPLACE PACKAGE BODY Organizator AS
 		pTyp IN mistrzostwa.typ%TYPE,
 		pGra IN gry.tytul%TYPE,
 		pNagroda IN mistrzostwa.nagroda%TYPE DEFAULT NULL) AS
+		vId mistrzostwa.id%TYPE;
 		vStatus mistrzostwa.status%TYPE;
 	BEGIN
+		vId := id_mistrzostw_SEQ.NEXTVAL;
+		
 		IF CURRENT_DATE - pData_begin < 0 THEN
 			vStatus := 'przed rozpoczęciem';
 		ELSIF pData_end IS NOT NULL THEN
@@ -136,17 +140,18 @@ CREATE OR REPLACE PACKAGE BODY Organizator AS
 		END IF;
 		
 		INSERT INTO mistrzostwa 
-		VALUES(pNazwa, pData_begin, pData_end, pOrganizator, pLokalizacja, 
-                pTyp, pNagroda, pGra, vStatus);
+		VALUES(vId, pNazwa, pData_begin, pData_end, pOrganizator, 
+				pLokalizacja, pTyp, pNagroda, pGra, vStatus);
 		
 		IF pTyp = 'Indywidualne' THEN
-			INSERT INTO mistrzostwa_indywidualne VALUES(pNazwa, pData_begin);
+			INSERT INTO mistrzostwa_indywidualne VALUES(vId);
 		ELSIF pTyp = 'Drużynowe' THEN
-			INSERT INTO mistrzostwa_druzynowe VALUES(pNazwa, pData_begin);
+			INSERT INTO mistrzostwa_druzynowe VALUES(vId);
 		END IF;
 	END;
 	
 	PROCEDURE EdytujMistrzostwa(
+		pId IN mistrzostwa.id%TYPE,
 		pNazwa IN mistrzostwa.nazwa%TYPE,
 		pData_begin IN mistrzostwa.data_begin%TYPE,
 		pData_end IN mistrzostwa.data_end%TYPE,
@@ -156,11 +161,13 @@ CREATE OR REPLACE PACKAGE BODY Organizator AS
 		pStatus IN mistrzostwa.status%TYPE) AS
 	BEGIN		
 		UPDATE mistrzostwa
-		SET data_end = pData_end,
+		SET nazwa = pNazwa,
+			data_begin = pData_begin,
+			data_end = pData_end,
 			lokalizacja = pLokalizacja,
 			nagroda = pNagroda,
 			status = pStatus
-		WHERE nazwa = pNazwa AND data_begin = TO_DATE(pData_begin, 'YYYY-MM-DD');
+		WHERE id = pId;
 	END;
 	
 	FUNCTION PobierzNazweOrganizatora
