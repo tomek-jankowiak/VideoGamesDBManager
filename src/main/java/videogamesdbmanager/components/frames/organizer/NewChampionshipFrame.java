@@ -47,18 +47,11 @@ public class NewChampionshipFrame extends JFrame {
   }
 
   private void onRegister() {
-    String type;
-    if (Objects.equals(typeComboBox.getSelectedItem(), "Indywidualne")) {
-      type = "i";
-    } else {
-      type = "d";
-    }
-
     if (controller_.addChampionships(nameField.getText(),
             beginDateField.getText(),
             endDateField.getText(),
             localizationField.getText(),
-            type,
+            Objects.requireNonNull(typeComboBox.getSelectedItem()).toString(),
             Objects.requireNonNull(gameComboBox.getSelectedItem()).toString(),
             prizeField.getText()
             )) {

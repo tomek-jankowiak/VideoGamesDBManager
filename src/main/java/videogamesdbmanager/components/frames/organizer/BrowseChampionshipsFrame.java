@@ -42,7 +42,7 @@ public class BrowseChampionshipsFrame extends JFrame {
   }
 
   private void refreshChampionshipsTable() {
-    String[] columnNames = {"Nazwa", "Gra", "Data rozpoczęcia", "Status"};
+    String[] columnNames = {"ID", "Nazwa", "Gra", "Typ", "Pula nagród", "Status"};
     DefaultTableModel model = (DefaultTableModel)championshipsTable.getModel();
     model.setRowCount(0);
     model.setColumnIdentifiers(columnNames);
@@ -54,12 +54,9 @@ public class BrowseChampionshipsFrame extends JFrame {
   private void onRowSelection(ListSelectionEvent e, ListSelectionModel selectionModel) {
     if (!e.getValueIsAdjusting() && !selectionModel.isSelectionEmpty()) {
       int selectedRowIndex = selectionModel.getMinSelectionIndex();
-      String[] championshipsKey = {
-              championshipsTable.getValueAt(selectedRowIndex, 0).toString(),
-              championshipsTable.getValueAt(selectedRowIndex, 2).toString()
-      };
+      String championshipsId = championshipsTable.getValueAt(selectedRowIndex, 0).toString();
       SwingUtilities.invokeLater(() -> {
-        ChampionshipDetailsFrame detailsFrame = new ChampionshipDetailsFrame(controller_, championshipsKey);
+        ChampionshipDetailsFrame detailsFrame = new ChampionshipDetailsFrame(controller_, championshipsId);
         detailsFrame.setVisible(true);
       });
     }

@@ -32,6 +32,42 @@ public class OrganizerController {
     }
   }
 
+  public int getChampionshipNumber() {
+    try {
+      Statement statement = connection_.createStatement();
+      ResultSet resultSet = statement.executeQuery(
+              String.format("SELECT %s.Organizator.PobierzLiczbeMistrzostw FROM dual", Application.ownerID)
+      );
+      resultSet.next();
+      int count = resultSet.getInt(1);
+      resultSet.close();
+      statement.close();
+
+      return count;
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return 0;
+    }
+  }
+
+  public double getPrizeSum() {
+    try {
+      Statement statement = connection_.createStatement();
+      ResultSet resultSet = statement.executeQuery(
+              String.format("SELECT %s.Organizator.PobierzSumeNagrod FROM dual", Application.ownerID)
+      );
+      resultSet.next();
+      double count = resultSet.getDouble(1);
+      resultSet.close();
+      statement.close();
+
+      return count;
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return 0;
+    }
+  }
+
   public boolean addChampionships(String name, String beginDate, String endDate, String localization,
                                   String type, String game, String prize) {
     try {
@@ -65,7 +101,45 @@ public class OrganizerController {
       return false;
     } catch (NumberFormatException ex) {
       JOptionPane.showMessageDialog(null,
-              "Niepoprawny format liczbowy", "Błąd", JOptionPane.ERROR_MESSAGE);
+              "Niepoprawny format liczbowy!", "Błąd", JOptionPane.ERROR_MESSAGE);
+      return false;
+    }
+  }
+
+  public boolean modifyChampionships(String championshipsId, String name, String beginDate, String endDate,
+                                     String localization, String type, String prize, String status) {
+    try {
+      PreparedStatement preparedStatement = connection_.prepareStatement(
+        String.format(
+                "BEGIN " +
+                "%s.Organizator.EdytujMistrzostwa(?, ?, TO_DATE(?, 'YYYY-MM-DD'), TO_DATE(?, 'YYYY-MM-DD'), " +
+                        "?, ?, ?, ?);" +
+                "END;",
+                Application.ownerID
+        )
+      );
+      preparedStatement.setString(1, championshipsId);
+      preparedStatement.setString(2, name);
+      preparedStatement.setString(3, beginDate);
+      preparedStatement.setString(4, endDate);
+      preparedStatement.setString(5, localization);
+      preparedStatement.setString(6, type);
+      if (!prize.isEmpty()) {
+        preparedStatement.setDouble(7, Double.parseDouble(prize));
+      } else {
+        preparedStatement.setString(7, null);
+      }
+      preparedStatement.setString(8, status);
+      preparedStatement.execute();
+      preparedStatement.close();
+
+      return true;
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return false;
+    } catch (NumberFormatException ex) {
+      JOptionPane.showMessageDialog(null,
+              "Niepoprawny format liczbowy!", "Błąd", JOptionPane.ERROR_MESSAGE);
       return false;
     }
   }
@@ -74,8 +148,8 @@ public class OrganizerController {
     ResultSet championshipsSet = getChampionships();
     try {
       while (championshipsSet.next()) {
-        Object[] objects = new Object[4];
-        for (int i = 0; i < 4; i++) {
+        Object[] objects = new Object[6];
+        for (int i = 0; i < 6; i++) {
           objects[i] = championshipsSet.getObject(i + 1);
         }
         tableModel.addRow(objects);
@@ -96,15 +170,38 @@ public class OrganizerController {
     }
   }
 
-  public void setChampionshipsParams(String[] championshipsKey, String[] championshipsParams) {
-    ResultSet details = getChampionshipsDetails(championshipsKey);
+  public void setChampionshipsParams(String championshipsId, String[] championshipsParams) {
+    ResultSet details = getChampionshipsDetails(championshipsId);
     try {
       details.next();
-      for (int i = 0; i < 8; i++) {
+      for (int i = 0; i < 9; i++) {
         championshipsParams[i] = details.getString(i + 1);
       }
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);
+    }
+  }
+
+  public boolean isOrganizersChampionship(String championshipsId) {
+    try {
+      Statement statement = connection_.createStatement();
+      ResultSet resultSet = statement.executeQuery(
+        String.format(
+                "SELECT organizator " +
+                "FROM %s.mistrzostwa " +
+                "WHERE id = '%s'",
+                Application.ownerID, championshipsId
+        )
+      );
+      resultSet.next();
+      String organizer = resultSet.getString(1);
+      resultSet.close();
+      statement.close();
+
+      return organizer.equals(getOrganizerName());
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return false;
     }
   }
 
@@ -142,7 +239,7 @@ public class OrganizerController {
     try {
       Statement statement = connection_.createStatement();
       return statement.executeQuery(
-              String.format("SELECT tytul FROM %s.gry", Application.ownerID)
+              String.format("SELECT tytul FROM %s.gry ORDER BY 1", Application.ownerID)
       );
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);
@@ -153,15 +250,9 @@ public class OrganizerController {
   private ResultSet getChampionships() {
     try {
       Statement statement = connection_.createStatement();
-      /*return statement.executeQuery(
-        String.format(
-                "SELECT nazwa, TO_CHAR(data_begin, 'YYYY-MM-DD'), TO_CHAR(data_end, 'YYYY-MM-DD'), organizator, " +
-                        "lokalizacja, nagroda, gra_tytul, status " +
-                "FROM %s.mistrzostwa",
-                Application.ownerID)
-      );*/
       return statement.executeQuery(
-              String.format("SELECT nazwa, gra_tytul, TO_CHAR(data_begin, 'YYYY-MM-DD'), status FROM %s.mistrzostwa",
+        String.format("SELECT id, nazwa, gra_tytul, typ, nagroda, status " +
+                      "FROM %s.mistrzostwa",
                       Application.ownerID)
       );
     } catch (SQLException ex) {
@@ -170,16 +261,16 @@ public class OrganizerController {
     }
   }
 
-  private ResultSet getChampionshipsDetails(String[] championshipsKey) {
+  private ResultSet getChampionshipsDetails(String championshipsId) {
     try {
       Statement statement = connection_.createStatement();
       return statement.executeQuery(
         String.format(
                 "SELECT nazwa, TO_CHAR(data_begin, 'YYYY-MM-DD'), TO_CHAR(data_end, 'YYYY-MM-DD'), organizator, " +
-                        "lokalizacja, nagroda, gra_tytul, status " +
+                        "lokalizacja, typ, nagroda, gra_tytul, status " +
                 "FROM %s.mistrzostwa " +
-                "WHERE nazwa = '%s' AND data_begin = TO_DATE('%s', 'YYYY-MM-DD')",
-                Application.ownerID, championshipsKey[0], championshipsKey[1]
+                "WHERE id = '%s'",
+                Application.ownerID, championshipsId
         )
       );
     } catch (SQLException ex) {
