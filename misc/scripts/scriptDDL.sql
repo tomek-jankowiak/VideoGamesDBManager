@@ -86,6 +86,7 @@ CREATE TABLE mistrzostwa (
 	data_end	 DATE,
     organizator  VARCHAR2(70) NOT NULL,
     lokalizacja  VARCHAR2(50) NOT NULL,
+	typ			 VARCHAR(20) NOT NULL,
     nagroda      NUMBER(10, 2),
     gra_tytul    VARCHAR2(50) NOT NULL,
 	status		 VARCHAR2(30)
@@ -169,7 +170,8 @@ ALTER TABLE druzyny
 		
 ALTER TABLE druzyny
 	ADD CONSTRAINT druzyna_menadzer_fk FOREIGN KEY (menadzer)
-		REFERENCES uzytkownicy ( nazwa_uzytkownika );
+		REFERENCES uzytkownicy ( nazwa_uzytkownika )
+		ON DELETE CASCADE;
 		
 ALTER TABLE mistrzostwa_druzynowe
     ADD CONSTRAINT druzynowe_mistrzostwa_fk FOREIGN KEY ( nazwa,
@@ -250,7 +252,8 @@ ALTER TABLE udzialy_indywidualne
 
 ALTER TABLE zawodnicy
     ADD CONSTRAINT zawodnik_druzyna_fk FOREIGN KEY ( druzyna_id )
-        REFERENCES druzyny ( id );
+        REFERENCES druzyny ( id )
+		ON DELETE CASCADE;
 
 
 CREATE OR REPLACE PROCEDURE ZarejestrujUdzialIndywidualny(

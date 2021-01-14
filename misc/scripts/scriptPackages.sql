@@ -21,6 +21,9 @@ CREATE OR REPLACE PACKAGE Menadzer AS
 		nazwa_m IN mistrzostwa_druzynowe.nazwa%TYPE,
 		data_m IN mistrzostwa_druzynowe.data%TYPE);
 		
+	FUNCTION PobierzIdDruzyny
+		RETURN NUMBER;
+		
 END Menadzer;
 /
 
@@ -59,6 +62,19 @@ CREATE OR REPLACE PACKAGE BODY Menadzer AS
 		INSERT INTO udzialy_druzynowe(druzynowe_nazwa, druzynowe_data, druzyna_id)
 					VALUES(nazwa_m, data_m, id_druzyny);
 	END;
+	
+	FUNCTION PobierzIdDruzyny
+		RETURN NUMBER AS
+	BEGIN
+		SELECT id
+		INTO vId
+		FROM druzyny
+		WHERE menadzer = (SELECT nazwa_uzytkownika
+						  FROM uzytkownicy
+                          WHERE id = USER
+                          );
+		RETURN vId;
+	END;
 
 END Menadzer;
 /
@@ -70,18 +86,27 @@ CREATE OR REPLACE PACKAGE Organizator AS
 		pData_end IN mistrzostwa.data_end%TYPE,
 		pOrganizator IN mistrzostwa.organizator%TYPE,
 		pLokalizacja IN mistrzostwa.lokalizacja%TYPE,
-		pTyp IN CHAR,
+		pTyp IN mistrzostwa.typ%TYPE,
 		pGra IN gry.tytul%TYPE,
 		pNagroda IN mistrzostwa.nagroda%TYPE DEFAULT NULL);
 		
-	PROCEDURE AktualizujMistrzostwa(
+	PROCEDURE EdytujMistrzostwa(
 		pNazwa IN mistrzostwa.nazwa%TYPE,
 		pData_begin IN mistrzostwa.data_begin%TYPE,
 		pData_end IN mistrzostwa.data_end%TYPE,
+		pLokalizacja IN mistrzostwa.lokalizacja%TYPE,
+		pTyp IN mistrzostwa.typ%TYPE,
+		pNagroda IN mistrzostwa.nagroda%TYPE,
 		pStatus IN mistrzostwa.status%TYPE);
 		
 	FUNCTION PobierzNazweOrganizatora
 		RETURN VARCHAR2;
+		
+	FUNCTION PobierzLiczbeMistrzostw
+		RETURN NUMBER;
+		
+	FUNCTION PobierzSumeNagrod
+		RETURN NUMBER;
 		
 END Organizator;
 /
@@ -93,7 +118,7 @@ CREATE OR REPLACE PACKAGE BODY Organizator AS
 		pData_end IN mistrzostwa.data_end%TYPE,
 		pOrganizator IN mistrzostwa.organizator%TYPE,
 		pLokalizacja IN mistrzostwa.lokalizacja%TYPE,
-		pTyp IN CHAR,
+		pTyp IN mistrzostwa.typ%TYPE,
 		pGra IN gry.tytul%TYPE,
 		pNagroda IN mistrzostwa.nagroda%TYPE DEFAULT NULL) AS
 		vStatus mistrzostwa.status%TYPE;
@@ -112,25 +137,30 @@ CREATE OR REPLACE PACKAGE BODY Organizator AS
 		
 		INSERT INTO mistrzostwa 
 		VALUES(pNazwa, pData_begin, pData_end, pOrganizator, pLokalizacja, 
-                pNagroda, pGra, vStatus);
+                pTyp, pNagroda, pGra, vStatus);
 		
-		IF pTyp = 'i' THEN
+		IF pTyp = 'Indywidualne' THEN
 			INSERT INTO mistrzostwa_indywidualne VALUES(pNazwa, pData_begin);
-		ELSIF pTyp = 'd' THEN
+		ELSIF pTyp = 'Drużynowe' THEN
 			INSERT INTO mistrzostwa_druzynowe VALUES(pNazwa, pData_begin);
 		END IF;
 	END;
 	
-	PROCEDURE AktualizujMistrzostwa(
+	PROCEDURE EdytujMistrzostwa(
 		pNazwa IN mistrzostwa.nazwa%TYPE,
 		pData_begin IN mistrzostwa.data_begin%TYPE,
 		pData_end IN mistrzostwa.data_end%TYPE,
+		pLokalizacja IN mistrzostwa.lokalizacja%TYPE,
+		pTyp IN mistrzostwa.typ%TYPE,
+		pNagroda IN mistrzostwa.nagroda%TYPE,
 		pStatus IN mistrzostwa.status%TYPE) AS
-	BEGIN
+	BEGIN		
 		UPDATE mistrzostwa
 		SET data_end = pData_end,
+			lokalizacja = pLokalizacja,
+			nagroda = pNagroda,
 			status = pStatus
-		WHERE nazwa = pNazwa AND data_begin = pData_begin;
+		WHERE nazwa = pNazwa AND data_begin = TO_DATE(pData_begin, 'YYYY-MM-DD');
 	END;
 	
 	FUNCTION PobierzNazweOrganizatora
@@ -142,7 +172,34 @@ CREATE OR REPLACE PACKAGE BODY Organizator AS
 		FROM uzytkownicy
 		WHERE id = USER;
 		RETURN vNazwa;
-	END;		
+	END;
+
+	FUNCTION PobierzLiczbeMistrzostw
+		RETURN NUMBER AS
+		vLiczba NUMBER;
+	BEGIN
+		SELECT COUNT(*)
+		INTO vLiczba
+		FROM mistrzostwa
+		WHERE organizator = (SELECT nazwa_uzytkownika
+							 FROM uzytkownicy
+							 WHERE id = USER);
+		RETURN vLiczba;
+	END;
+	
+	FUNCTION PobierzSumeNagrod
+		RETURN NUMBER AS
+		vSuma NUMBER;
+	BEGIN
+		SELECT SUM(nagroda)
+		INTO vSuma
+		FROM mistrzostwa
+		GROUP BY organizator HAVING(organizator = (
+								SELECT nazwa_uzytkownika
+								FROM uzytkownicy
+								WHERE id = USER));
+		RETURN vSuma;
+	END;
 
 END Organizator;
 /
