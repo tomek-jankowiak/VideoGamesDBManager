@@ -45,6 +45,8 @@ public class NewStudioSheet extends JFrame {
     if(controller_.addCEO(ceoName, studioName, creationDate)) {
       parentFrame_.dispose();
       this.dispose();
+    } else {
+      controller_.deleteAccount();
     }
   }
 

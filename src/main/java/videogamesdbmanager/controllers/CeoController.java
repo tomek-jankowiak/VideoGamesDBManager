@@ -107,8 +107,9 @@ public class CeoController {
       return 0;
     }
   }
+
   public boolean addEmployee(String pesel, String name, String surname,
-                             Double salary, String empDate, String department) {
+                             String salary, String empDate, String department) {
     String company = getCompanyName();
 
     try {
@@ -123,7 +124,11 @@ public class CeoController {
       preparedStatement.setString(1, pesel);
       preparedStatement.setString(2, name);
       preparedStatement.setString(3, surname);
-      preparedStatement.setDouble(4, salary);
+      if (!salary.isEmpty()) {
+        preparedStatement.setDouble(4, Double.parseDouble(salary));
+      } else {
+        preparedStatement.setString(4, null);
+      }
       preparedStatement.setString(5, company);
       preparedStatement.setString(6, empDate);
       preparedStatement.setString(7, department);
@@ -134,10 +139,14 @@ public class CeoController {
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);
       return false;
+    } catch (NumberFormatException ex) {
+      JOptionPane.showMessageDialog(null,
+              "Niepoprawny format liczbowy", "Błąd", JOptionPane.ERROR_MESSAGE);
+      return false;
     }
   }
 
-  public boolean modifyEmployee(String pesel, Double salary, String department) {
+  public boolean modifyEmployee(String pesel, String salary, String department) {
     try {
       PreparedStatement preparedStatement = connection_.prepareStatement(
         String.format(
@@ -148,7 +157,11 @@ public class CeoController {
         )
       );
       preparedStatement.setString(1, pesel);
-      preparedStatement.setDouble(2, salary);
+      if (!salary.isEmpty()) {
+        preparedStatement.setDouble(2, Double.parseDouble(salary));
+      } else {
+        preparedStatement.setString(2, null);
+      }
       preparedStatement.setString(3, department);
       preparedStatement.execute();
       preparedStatement.close();
@@ -301,6 +314,10 @@ public class CeoController {
       return true;
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);
+      return false;
+    } catch (NumberFormatException ex) {
+      JOptionPane.showMessageDialog(null,
+              "Niepoprawny format liczbowy!", "Błąd", JOptionPane.ERROR_MESSAGE);
       return false;
     }
   }

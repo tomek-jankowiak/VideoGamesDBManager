@@ -6,6 +6,7 @@ import videogamesdbmanager.components.frames.organizer.OrganizerMainFrame;
 import videogamesdbmanager.error.SqlExceptionHandler;
 
 import javax.swing.*;
+import javax.swing.plaf.nimbus.State;
 import java.sql.*;
 import java.util.Properties;
 
@@ -160,6 +161,33 @@ public class NewUserController {
       preparedStatement.execute();
       preparedStatement.close();
 
+      return true;
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+      return false;
+    }
+  }
+
+  public void deleteAccount() {
+    try {
+      Statement statement = connection_.createStatement();
+      statement.execute(
+        String.format(
+                "BEGIN " +
+                        "%s.Wspolne.UsunKonto();" +
+                "END;",
+                Application.ownerID
+        )
+      );
+      statement.close();
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+    }
+  }
+
+  public boolean closeConnection() {
+    try {
+      connection_.close();
       return true;
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);
