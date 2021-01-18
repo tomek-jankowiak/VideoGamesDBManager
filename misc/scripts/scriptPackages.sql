@@ -448,7 +448,7 @@ CREATE OR REPLACE PACKAGE BODY Prezes AS
 		data_zatrudnienia IN pracownicy_studia.data_zatrudnienia%TYPE DEFAULT SYSDATE,
 		dzial IN pracownicy_studia.dzial%TYPE DEFAULT NULL) AS
 	BEGIN
-		IF pPlaca IS NULL OR pPlaca <= 0 THEN
+		IF placa IS NULL OR placa <= 0 THEN
 			RAISE_APPLICATION_ERROR(-20303, 'Płaca musi być większa od 0!');
 		END IF;
 		
