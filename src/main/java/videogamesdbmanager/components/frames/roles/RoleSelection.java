@@ -3,13 +3,14 @@ package videogamesdbmanager.components.frames.roles;
 import videogamesdbmanager.controllers.NewUserController;
 
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.*;
 
 public class RoleSelection extends JFrame {
   private JButton organizerButton;
   private JButton ceoButton;
   private JButton managerButton;
-  private JButton workerButton;
   private JPanel rolePanel;
 
   private final NewUserController controller_;
@@ -23,10 +24,14 @@ public class RoleSelection extends JFrame {
     this.setLocationRelativeTo(null);
     this.pack();
 
+    this.addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent e) {
+        onClose();
+      }
+    });
     organizerButton.addActionListener(e -> onOrganizer());
     ceoButton.addActionListener(e -> onCEO());
     managerButton.addActionListener(e -> onManager());
-    workerButton.addActionListener(e -> onWorker());
 
     controller_ = new NewUserController(connection, username);
   }
@@ -49,7 +54,9 @@ public class RoleSelection extends JFrame {
     newManagerFrame.setVisible(true);
   }
 
-  private void onWorker() {
-    //TODO
+  private void onClose() {
+    if (controller_.closeConnection()) {
+      this.dispose();
+    }
   }
 }

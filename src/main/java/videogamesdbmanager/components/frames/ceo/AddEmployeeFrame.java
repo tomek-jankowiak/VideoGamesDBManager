@@ -47,7 +47,7 @@ public class AddEmployeeFrame extends JFrame{
             peselTextField.getText(),
             nameTextField.getText(),
             surnameTextField.getText(),
-            Double.parseDouble(salaryTextField.getText()),
+            salaryTextField.getText(),
             empDateTextField.getText(),
             departmentTextField.getText())
     ) {

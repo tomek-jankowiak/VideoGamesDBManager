@@ -43,7 +43,15 @@ CREATE OR REPLACE PACKAGE BODY Menadzer AS
 		id_druzyny IN zawodnicy.druzyna_id%TYPE,
 		placa IN zawodnicy.placa%TYPE DEFAULT 0) AS
 	BEGIN
+		IF placa <= 0 THEN
+			RAISE_APPLICATION_ERROR(-20103, 'Płaca musi być większa od 0!');
+		END IF;
+		
 		INSERT INTO Zawodnicy VALUES(pseudonim, imie, nazwisko, kraj, data_urodzenia, placa, id_druzyny);
+		
+	EXCEPTION
+		WHEN DUP_VAL_ON_INDEX THEN
+			RAISE_APPLICATION_ERROR(-20102, 'Istnieje już zawodnik o takim pseudonimie!');
 	END;
 
 	PROCEDURE NowaDruzyna(
@@ -52,12 +60,20 @@ CREATE OR REPLACE PACKAGE BODY Menadzer AS
 		region IN druzyny.region_nazwa_regionu%TYPE DEFAULT NULL) AS
 	BEGIN
 		INSERT INTO druzyny VALUES(id_druzyny_SEQ.NEXTVAL, nazwa, menadzer, region);
+		
+	EXCEPTION
+		WHEN DUP_VAL_ON_INDEX THEN
+			RAISE_APPLICATION_ERROR(-20101, 'Istnieje już drużyna o takiej nazwie!');
 	END;
 	
 	PROCEDURE NowyRegion(
 		nazwa IN regiony.nazwa_regionu%TYPE) AS
 	BEGIN
 		INSERT INTO regiony VALUES(nazwa);
+		
+	EXCEPTION
+		WHEN DUP_VAL_ON_INDEX THEN
+			RAISE_APPLICATION_ERROR(-20104, 'Istnieje już region o takiej nazwie!');
 	END;
 	
 	PROCEDURE ZarejestrujUdzialDruzynowy(
@@ -66,15 +82,23 @@ CREATE OR REPLACE PACKAGE BODY Menadzer AS
 	BEGIN
 		INSERT INTO udzialy_druzynowe(druzyna_id, druzynowe_id)
 					VALUES(id_druzyny, druzynowe_id);
+		
+	EXCEPTION
+		WHEN DUP_VAL_ON_INDEX THEN
+			RAISE_APPLICATION_ERROR(-20105, 'Uczestnik jest już zgłoszony na te zawody!');
 	END;
 	
 	PROCEDURE ModyfikujZawodnika(
         nick IN zawodnicy.pseudonim%TYPE,
         nowa_placa IN zawodnicy.placa%TYPE) AS
     BEGIN
+		IF nowa_placa <= 0 THEN
+			RAISE_APPLICATION_ERROR(-20103, 'Płaca musi być większa od 0!');
+		END IF;
+		
         UPDATE zawodnicy
-            SET placa = nowa_placa
-            WHERE pseudonim = nick;
+        SET placa = nowa_placa
+		WHERE pseudonim = nick;
     END;
     
     PROCEDURE UsunZawodnika(
@@ -162,6 +186,12 @@ CREATE OR REPLACE PACKAGE BODY Organizator AS
 		vId mistrzostwa.id%TYPE;
 		vStatus mistrzostwa.status%TYPE;
 	BEGIN
+		IF pData_end IS NOT NULL AND pData_end - pData_begin < 0 THEN
+			RAISE_APPLICATION_ERROR(-20201, 'Data zakończenia musi być późniejsza od daty rozpoczęcia!');
+		ELSIF pNagroda <= 0 THEN
+			RAISE_APPLICATION_ERROR(-20202, 'Pula nagród musi być większa od 0!');
+		END IF;
+		
 		vId := id_mistrzostw_SEQ.NEXTVAL;
 		
 		IF CURRENT_DATE - pData_begin < 0 THEN
@@ -196,7 +226,28 @@ CREATE OR REPLACE PACKAGE BODY Organizator AS
 		pTyp IN mistrzostwa.typ%TYPE,
 		pNagroda IN mistrzostwa.nagroda%TYPE,
 		pStatus IN mistrzostwa.status%TYPE) AS
-	BEGIN		
+		vStatus mistrzostwa.status%TYPE;
+	BEGIN
+		IF CURRENT_DATE - pData_begin < 0 THEN
+			vStatus := 'przed rozpoczęciem';
+		ELSIF pData_end IS NOT NULL THEN
+			IF CURRENT_DATE - pData_end < 0 THEN
+				vStatus := 'trwają';
+			ELSE
+				vStatus := 'zakończone';
+			END IF;
+		ELSE
+			vStatus := 'trwają';
+		END IF;
+		
+		IF pData_end IS NOT NULL AND pData_end - pData_begin < 0 THEN
+			RAISE_APPLICATION_ERROR(-20201, 'Data zakończenia musi być późniejsza od daty rozpoczęcia!');
+		ELSIF pNagroda <= 0 THEN
+			RAISE_APPLICATION_ERROR(-20202, 'Pula nagród musi być większa od 0!');
+		ELSIF pStatus <> vStatus THEN
+			RAISE_APPLICATION_ERROR(-20203, 'Niepoprawny status mistrzostw!');
+		END IF;	
+		
 		UPDATE mistrzostwa
 		SET nazwa = pNazwa,
 			data_begin = pData_begin,
@@ -214,7 +265,19 @@ CREATE OR REPLACE PACKAGE BODY Organizator AS
 		pProcent IN udzialy_druzynowe.procent_puli%TYPE) AS
 		vPula mistrzostwa.nagroda%TYPE;
 		vNagroda udzialy_druzynowe.nagroda%TYPE;
+        vCount NUMBER;
 	BEGIN
+        SELECT COUNT(*)
+        INTO vCount
+        FROM udzialy_druzynowe 
+        WHERE druzynowe_id = pId_m;
+        
+		IF (pWynik IS NULL) OR (pWynik NOT BETWEEN 1 AND vCount) THEN
+			RAISE_APPLICATION_ERROR(-20204, 'Niepoprawne miejsce!');
+		ELSIF pProcent NOT BETWEEN 0 AND 100 THEN
+			RAISE_APPLICATION_ERROR(-20205, 'Procent puli musi być z przedziału <0, 100>');
+		END IF;
+		
 		SELECT nagroda
 		INTO vPula
 		FROM mistrzostwa
@@ -236,7 +299,19 @@ CREATE OR REPLACE PACKAGE BODY Organizator AS
 		pProcent IN udzialy_indywidualne.procent_puli%TYPE) AS
 		vPula mistrzostwa.nagroda%TYPE;
 		vNagroda udzialy_druzynowe.nagroda%TYPE;
+        vCount NUMBER;
 	BEGIN
+        SELECT COUNT(*)
+        INTO vCount
+        FROM udzialy_druzynowe 
+        WHERE druzynowe_id = pId_m;
+        
+		IF (pWynik IS NULL) OR (pWynik NOT BETWEEN 1 AND vCount) THEN
+			RAISE_APPLICATION_ERROR(-20204, 'Niepoprawne miejsce!');
+		ELSIF pProcent NOT BETWEEN 0 AND 100 THEN
+			RAISE_APPLICATION_ERROR(-20205, 'Procent puli musi być z przedziału <0, 100>');
+		END IF;
+		
 		SELECT nagroda
 		INTO vPula
 		FROM mistrzostwa
@@ -358,6 +433,10 @@ CREATE OR REPLACE PACKAGE BODY Prezes AS
 		prezes IN studia.prezes%TYPE DEFAULT NULL) AS
 	BEGIN
 		INSERT INTO studia VALUES(nazwa, data_zalozenia, prezes);
+	
+	EXCEPTION
+		WHEN DUP_VAL_ON_INDEX THEN
+			RAISE_APPLICATION_ERROR(-20301, 'Istnieje już studio o takiej nazwie!');
 	END;
 	
 	PROCEDURE DodajPracownika(
@@ -369,8 +448,16 @@ CREATE OR REPLACE PACKAGE BODY Prezes AS
 		data_zatrudnienia IN pracownicy_studia.data_zatrudnienia%TYPE DEFAULT SYSDATE,
 		dzial IN pracownicy_studia.dzial%TYPE DEFAULT NULL) AS
 	BEGIN
+		IF placa IS NULL OR placa <= 0 THEN
+			RAISE_APPLICATION_ERROR(-20303, 'Płaca musi być większa od 0!');
+		END IF;
+		
 		INSERT INTO pracownicy_studia 
 				VALUES(pesel, imie, nazwisko, placa, data_zatrudnienia, dzial, studio);
+				
+	EXCEPTION
+		WHEN DUP_VAL_ON_INDEX THEN
+			RAISE_APPLICATION_ERROR(-20302, 'Istnieje już pracownik o takim numerze PESEL!');
 	END;
 	
 	PROCEDURE EdytujPracownika(
@@ -378,6 +465,10 @@ CREATE OR REPLACE PACKAGE BODY Prezes AS
 		pPlaca IN pracownicy_studia.placa%TYPE,
 		pDzial IN pracownicy_studia.dzial%TYPE DEFAULT NULL) AS
 	BEGIN
+		IF pPlaca IS NULL OR pPlaca <= 0 THEN
+			RAISE_APPLICATION_ERROR(-20303, 'Płaca musi być większa od 0!');
+		END IF;
+		
 		UPDATE pracownicy_studia
 		SET placa = pPlaca,
 			dzial = pDzial
@@ -400,7 +491,17 @@ CREATE OR REPLACE PACKAGE BODY Prezes AS
 		box_office IN gry.box_office%TYPE DEFAULT NULL,
 		budzet IN gry.budzet%TYPE DEFAULT NULL) AS
 	BEGIN
+		IF kategoria_wiekowa <= 0 THEN
+			RAISE_APPLICATION_ERROR(-20305, 'Niepoprawna kategoria wiekowa!');
+		ELSIF box_office <= 0 OR budzet <= 0 THEN
+			RAISE_APPLICATION_ERROR(-20306, 'Box office i budżet muszą być większe od 0!');
+		END IF;
+		
 		INSERT INTO gry VALUES(tytul, data_wydania, kategoria_wiekowa, box_office, budzet, studio, gatunek);
+		
+	EXCEPTION
+		WHEN DUP_VAL_ON_INDEX THEN
+			RAISE_APPLICATION_ERROR(-20304, 'Istnieje już gra o takim tytule!');
 	END;
 	
 	PROCEDURE PrzypiszGreDoPlatformy(
@@ -415,6 +516,10 @@ CREATE OR REPLACE PACKAGE BODY Prezes AS
 		nadgatunek IN gatunki.nazwa_nadgatunku%TYPE DEFAULT NULL) AS
 	BEGIN 
 		INSERT INTO gatunki VALUES(gatunek, nadgatunek);
+		
+	EXCEPTION
+		WHEN DUP_VAL_ON_INDEX THEN
+			RAISE_APPLICATION_ERROR(-20307, 'Istnieje już taki gatunek!');
 	END;
 	
 	FUNCTION PobierzNazweStudia 
@@ -467,18 +572,30 @@ CREATE OR REPLACE PACKAGE BODY Wspolne AS
 		pNazwa IN uzytkownicy.nazwa_uzytkownika%TYPE) AS
 	BEGIN
 		INSERT INTO uzytkownicy VALUES(USER, 'PREZES', pNazwa);
+		
+	EXCEPTION
+		WHEN DUP_VAL_ON_INDEX THEN
+			RAISE_APPLICATION_ERROR(-20001, 'Istnieje już użytkownik o takiej nazwie!');
 	END;
 	
 	PROCEDURE DodajMenadzera(
 		pNazwa IN uzytkownicy.nazwa_uzytkownika%TYPE) AS
 	BEGIN
 		INSERT INTO uzytkownicy VALUES(USER, 'MENADZER', pNazwa);
+		
+	EXCEPTION
+		WHEN DUP_VAL_ON_INDEX THEN
+			RAISE_APPLICATION_ERROR(-20001, 'Istnieje już użytkownik o takiej nazwie!');
 	END;
 	
 	PROCEDURE DodajOrganizatora(
 		pNazwa IN uzytkownicy.nazwa_uzytkownika%TYPE) AS
 	BEGIN
 		INSERT INTO uzytkownicy VALUES(USER, 'ORGANIZATOR', pNazwa);
+		
+	EXCEPTION
+		WHEN DUP_VAL_ON_INDEX THEN
+			RAISE_APPLICATION_ERROR(-20001, 'Istnieje już użytkownik o takiej nazwie!');
 	END;
 	
 	PROCEDURE UsunKonto AS

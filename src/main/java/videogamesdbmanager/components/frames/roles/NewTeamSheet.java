@@ -91,6 +91,8 @@ public class NewTeamSheet extends JFrame {
     if(controller_.addManager(managerName, teamName, regionName, isNewRegion)) {
       parentFrame_.dispose();
       this.dispose();
+    } else {
+      controller_.deleteAccount();
     }
   }
 
@@ -98,5 +100,4 @@ public class NewTeamSheet extends JFrame {
     dispose();
     parentFrame_.setVisible(true);
   }
-
 }

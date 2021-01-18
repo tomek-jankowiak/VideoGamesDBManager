@@ -87,11 +87,7 @@ public class OrganizerController {
      preparedStatement.setString(5, localization);
      preparedStatement.setString(6, type);
      preparedStatement.setString(7, game);
-     if (!prize.isEmpty()) {
-       preparedStatement.setDouble(8, Double.parseDouble(prize));
-     } else {
-       preparedStatement.setString(8, null);
-     }
+     preparedStatement.setString(8, prize);
      preparedStatement.execute();
      preparedStatement.close();
 
@@ -124,11 +120,7 @@ public class OrganizerController {
       preparedStatement.setString(4, endDate);
       preparedStatement.setString(5, localization);
       preparedStatement.setString(6, type);
-      if (!prize.isEmpty()) {
-        preparedStatement.setDouble(7, Double.parseDouble(prize));
-      } else {
-        preparedStatement.setString(7, null);
-      }
+      preparedStatement.setString(7, prize);
       preparedStatement.setString(8, status);
       preparedStatement.execute();
       preparedStatement.close();
@@ -136,10 +128,6 @@ public class OrganizerController {
       return true;
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);
-      return false;
-    } catch (NumberFormatException ex) {
-      JOptionPane.showMessageDialog(null,
-              "Niepoprawny format liczbowy!", "Błąd", JOptionPane.ERROR_MESSAGE);
       return false;
     }
   }
@@ -165,40 +153,23 @@ public class OrganizerController {
                         Application.ownerID
                 )
         );
-        preparedStatement.setInt(1, Integer.parseInt(championshipsId));
-        assert params[0] != null;
-        preparedStatement.setInt(2, Integer.parseInt(params[0]));
-        if (!params[2].isEmpty()) {
-          preparedStatement.setInt(3, Integer.parseInt(params[2]));
-        } else {
-          preparedStatement.setString(3, null);
-        }
-        if (!params[4].isEmpty()) {
-          preparedStatement.setDouble(4, Double.parseDouble(params[4]));
-        } else {
-          preparedStatement.setString(4, null);
-        }
+        preparedStatement.setString(1, championshipsId);
+        preparedStatement.setString(2, params[0]);
+        preparedStatement.setString(3, params[2]);
+        preparedStatement.setString(4, params[4]);
       } else {
         preparedStatement = connection_.prepareStatement(
-                String.format(
-                        "BEGIN " +
-                                "%s.Organizator.DodajWynikIndywidualny(?, ?, ?, ?); " +
-                                "END;",
-                        Application.ownerID
-                )
+          String.format(
+                  "BEGIN " +
+                          "%s.Organizator.DodajWynikIndywidualny(?, ?, ?, ?); " +
+                          "END;",
+                  Application.ownerID
+          )
         );
         preparedStatement.setInt(1, Integer.parseInt(championshipsId));
         preparedStatement.setString(2, params[0]);
-        if (!params[1].isEmpty()) {
-          preparedStatement.setInt(3, Integer.parseInt(params[1]));
-        } else {
-          preparedStatement.setString(3, null);
-        }
-        if (!params[3].isEmpty()) {
-          preparedStatement.setDouble(4, Double.parseDouble(params[3]));
-        } else {
-          preparedStatement.setString(4, null);
-        }
+        preparedStatement.setString(3, params[1]);
+        preparedStatement.setString(4, params[3]);
       }
       preparedStatement.execute();
       preparedStatement.close();
@@ -206,14 +177,6 @@ public class OrganizerController {
       return true;
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);
-      return false;
-    } catch (NullPointerException ex) {
-      JOptionPane.showMessageDialog(null,
-              "Procent puli nie może być pusty!", "Błąd", JOptionPane.ERROR_MESSAGE);
-      return false;
-    } catch (NumberFormatException ex) {
-      JOptionPane.showMessageDialog(null,
-              "Niepoprawny format liczbowy!", "Błąd", JOptionPane.ERROR_MESSAGE);
       return false;
     }
   }

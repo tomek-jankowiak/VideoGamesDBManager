@@ -107,8 +107,9 @@ public class CeoController {
       return 0;
     }
   }
+
   public boolean addEmployee(String pesel, String name, String surname,
-                             Double salary, String empDate, String department) {
+                             String salary, String empDate, String department) {
     String company = getCompanyName();
 
     try {
@@ -123,7 +124,7 @@ public class CeoController {
       preparedStatement.setString(1, pesel);
       preparedStatement.setString(2, name);
       preparedStatement.setString(3, surname);
-      preparedStatement.setDouble(4, salary);
+      preparedStatement.setString(4, salary);
       preparedStatement.setString(5, company);
       preparedStatement.setString(6, empDate);
       preparedStatement.setString(7, department);
@@ -137,7 +138,7 @@ public class CeoController {
     }
   }
 
-  public boolean modifyEmployee(String pesel, Double salary, String department) {
+  public boolean modifyEmployee(String pesel, String salary, String department) {
     try {
       PreparedStatement preparedStatement = connection_.prepareStatement(
         String.format(
@@ -148,7 +149,7 @@ public class CeoController {
         )
       );
       preparedStatement.setString(1, pesel);
-      preparedStatement.setDouble(2, salary);
+      preparedStatement.setString(2, salary);
       preparedStatement.setString(3, department);
       preparedStatement.execute();
       preparedStatement.close();
@@ -280,21 +281,9 @@ public class CeoController {
       preparedStatement.setString(2, releaseDate);
       preparedStatement.setString(3, gameType);
       preparedStatement.setString(4, company);
-      if (!ageCat.isEmpty()) {
-        preparedStatement.setInt(5, Integer.parseInt(ageCat));
-      } else {
-        preparedStatement.setString(5, null);
-      }
-      if (!boxOffice.isEmpty()) {
-        preparedStatement.setDouble(6, Double.parseDouble(boxOffice));
-      } else {
-        preparedStatement.setString(6, null);
-      }
-      if (!budget.isEmpty()) {
-        preparedStatement.setDouble(7, Double.parseDouble(budget));
-      } else {
-        preparedStatement.setString(7, null);
-      }
+      preparedStatement.setString(5, ageCat);
+      preparedStatement.setString(6, boxOffice);
+      preparedStatement.setString(7, budget);
       preparedStatement.execute();
       preparedStatement.close();
 

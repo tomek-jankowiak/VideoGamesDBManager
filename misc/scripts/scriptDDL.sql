@@ -32,7 +32,7 @@ ALTER TABLE uzytkownicy ADD CONSTRAINT uzytkownicy_pk PRIMARY KEY ( id );
 
 CREATE TABLE druzyny (
     id                    NUMBER(3, 0) NOT NULL,
-    nazwa                 VARCHAR2(50) NOT NULL,
+    nazwa                 VARCHAR2(50) NOT NULL UNIQUE,
 	menadzer			  VARCHAR2(70) NOT NULL,
     region_nazwa_regionu  VARCHAR2(30)
 );

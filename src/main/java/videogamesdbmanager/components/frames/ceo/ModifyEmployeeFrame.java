@@ -56,10 +56,10 @@ public class ModifyEmployeeFrame extends JFrame {
   }
 
   private void onModify() {
-    String pesel = peselTextField.getText();
-    Double salary = Double.parseDouble(salaryTextField.getText());
-    String department = departmentTextField.getText();
-    if (controller_.modifyEmployee(pesel, salary, department)) {
+    if (controller_.modifyEmployee(peselTextField.getText(),
+            salaryTextField.getText(),
+            departmentTextField.getText())
+    ) {
       JOptionPane.showMessageDialog(null, "Zmodyfikowano pracownika");
       parentFrame_.refreshEmployeesTable();
     }
