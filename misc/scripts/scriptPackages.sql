@@ -18,8 +18,14 @@ CREATE OR REPLACE PACKAGE Menadzer AS
 		
 	PROCEDURE ZarejestrujUdzialDruzynowy(
 		id_druzyny IN druzyny.id%TYPE,
-		nazwa_m IN mistrzostwa_druzynowe.nazwa%TYPE,
-		data_m IN mistrzostwa_druzynowe.data%TYPE);
+		druzynowe_id IN mistrzostwa.id%TYPE);
+		
+	PROCEDURE UsunZawodnika(
+        nick IN zawodnicy.pseudonim%TYPE);
+        
+    PROCEDURE ModyfikujZawodnika(
+        nick IN zawodnicy.pseudonim%TYPE,
+        nowa_placa IN zawodnicy.placa%TYPE);
 		
 	FUNCTION PobierzIdDruzyny
 		RETURN NUMBER;
@@ -56,15 +62,30 @@ CREATE OR REPLACE PACKAGE BODY Menadzer AS
 	
 	PROCEDURE ZarejestrujUdzialDruzynowy(
 		id_druzyny IN druzyny.id%TYPE,
-		nazwa_m IN mistrzostwa_druzynowe.nazwa%TYPE,
-		data_m IN mistrzostwa_druzynowe.data%TYPE) AS
+		druzynowe_id IN mistrzostwa.id%TYPE) AS
 	BEGIN
-		INSERT INTO udzialy_druzynowe(druzynowe_nazwa, druzynowe_data, druzyna_id)
-					VALUES(nazwa_m, data_m, id_druzyny);
+		INSERT INTO udzialy_druzynowe(druzyna_id, druzynowe_id)
+					VALUES(id_druzyny, druzynowe_id);
 	END;
+	
+	PROCEDURE ModyfikujZawodnika(
+        nick IN zawodnicy.pseudonim%TYPE,
+        nowa_placa IN zawodnicy.placa%TYPE) AS
+    BEGIN
+        UPDATE zawodnicy
+            SET placa = nowa_placa
+            WHERE pseudonim = nick;
+    END;
+    
+    PROCEDURE UsunZawodnika(
+		nick IN zawodnicy.pseudonim%TYPE) AS
+    BEGIN
+        DELETE FROM zawodnicy WHERE nick = pseudonim;
+    END;
 	
 	FUNCTION PobierzIdDruzyny
 		RETURN NUMBER AS
+		vId druzyny.id%TYPE;
 	BEGIN
 		SELECT id
 		INTO vId
@@ -100,6 +121,18 @@ CREATE OR REPLACE PACKAGE Organizator AS
 		pNagroda IN mistrzostwa.nagroda%TYPE,
 		pStatus IN mistrzostwa.status%TYPE);
 		
+	PROCEDURE DodajWynikDruzynowy(
+		pId_m IN udzialy_druzynowe.druzynowe_id%TYPE,
+		pId_d IN udzialy_druzynowe.druzyna_id%TYPE,
+		pWynik IN udzialy_druzynowe.wynik%TYPE,
+		pProcent IN udzialy_druzynowe.procent_puli%TYPE);
+		
+	PROCEDURE DodajWynikIndywidualny(
+		pId_m IN udzialy_indywidualne.indywidualne_id%TYPE,
+		pPseudonim IN udzialy_indywidualne.zawodnik_pseudonim%TYPE,
+		pWynik IN udzialy_indywidualne.wynik%TYPE,
+		pProcent IN udzialy_indywidualne.procent_puli%TYPE);
+		
 	FUNCTION PobierzNazweOrganizatora
 		RETURN VARCHAR2;
 		
@@ -108,6 +141,10 @@ CREATE OR REPLACE PACKAGE Organizator AS
 		
 	FUNCTION PobierzSumeNagrod
 		RETURN NUMBER;
+		
+	FUNCTION PobierzNazweDruzyny(
+		pIdDruzyny IN druzyny.id%TYPE)
+		RETURN VARCHAR2;
 		
 END Organizator;
 /
@@ -170,6 +207,51 @@ CREATE OR REPLACE PACKAGE BODY Organizator AS
 		WHERE id = pId;
 	END;
 	
+	PROCEDURE DodajWynikDruzynowy(
+		pId_m IN udzialy_druzynowe.druzynowe_id%TYPE,
+		pId_d IN udzialy_druzynowe.druzyna_id%TYPE,
+		pWynik IN udzialy_druzynowe.wynik%TYPE,
+		pProcent IN udzialy_druzynowe.procent_puli%TYPE) AS
+		vPula mistrzostwa.nagroda%TYPE;
+		vNagroda udzialy_druzynowe.nagroda%TYPE;
+	BEGIN
+		SELECT nagroda
+		INTO vPula
+		FROM mistrzostwa
+		WHERE id = pId_m;
+		
+		vNagroda := pProcent / 100 * vPula;
+		
+		UPDATE udzialy_druzynowe
+		SET wynik = pWynik,
+			nagroda = vNagroda,
+			procent_puli = pProcent
+		WHERE druzynowe_id = pId_m AND druzyna_id = pId_d;
+	END;
+	
+	PROCEDURE DodajWynikIndywidualny(
+		pId_m IN udzialy_indywidualne.indywidualne_id%TYPE,
+		pPseudonim IN udzialy_indywidualne.zawodnik_pseudonim%TYPE,
+		pWynik IN udzialy_indywidualne.wynik%TYPE,
+		pProcent IN udzialy_indywidualne.procent_puli%TYPE) AS
+		vPula mistrzostwa.nagroda%TYPE;
+		vNagroda udzialy_druzynowe.nagroda%TYPE;
+	BEGIN
+		SELECT nagroda
+		INTO vPula
+		FROM mistrzostwa
+		WHERE id = pId_m;
+		
+		vNagroda := pProcent / 100 * vPula;
+		
+		UPDATE udzialy_indywidualne
+		SET wynik = pWynik,
+			nagroda = vNagroda,
+			procent_puli = pProcent
+		WHERE indywidualne_id = pId_m AND zawodnik_pseudonim = pPseudonim;
+	END;
+		
+		
 	FUNCTION PobierzNazweOrganizatora
 		RETURN VARCHAR2 AS
 		vNazwa uzytkownicy.nazwa_uzytkownika%TYPE;
@@ -208,6 +290,18 @@ CREATE OR REPLACE PACKAGE BODY Organizator AS
 		RETURN vSuma;
 	END;
 
+	FUNCTION PobierzNazweDruzyny(
+		pIdDruzyny IN druzyny.id%TYPE)
+		RETURN VARCHAR2 AS
+		vNazwa druzyny.nazwa%TYPE;
+	BEGIN
+		SELECT nazwa
+		INTO vNazwa
+		FROM druzyny
+		WHERE id = pIdDruzyny;
+		RETURN vNazwa;
+	END;
+		
 END Organizator;
 /
 

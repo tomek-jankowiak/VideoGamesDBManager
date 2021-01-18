@@ -23,7 +23,7 @@ CREATE SEQUENCE id_druzyny_SEQ START WITH 1;
 CREATE SEQUENCE id_mistrzostw_SEQ START WITH 1;
 
 CREATE TABLE uzytkownicy (
-	id  				  VARCHAR2(9) NOT NULL,
+	id  				  VARCHAR2(30) NOT NULL,
 	typ					  VARCHAR2(30) NOT NULL,
 	nazwa_uzytkownika	  VARCHAR2(70) NOT NULL UNIQUE
 );
@@ -56,7 +56,7 @@ CREATE TABLE gry (
     tytul              VARCHAR2(50) NOT NULL,
     data_wydania       DATE NOT NULL,
     kategoria_wiekowa  NUMBER(3, 0),
-    box_office         NUMBER(10, 2),
+    box_office         NUMBER(15, 2),
     budzet             NUMBER(10, 2),
     studio_nazwa       VARCHAR2(50) NOT NULL,
 	nazwa_gatunku	   VARCHAR2(50) NOT NULL
@@ -127,10 +127,11 @@ CREATE TABLE studia (
 ALTER TABLE studia ADD CONSTRAINT studia_pk PRIMARY KEY ( nazwa );
 
 CREATE TABLE udzialy_druzynowe (
-    wynik            NUMBER(3, 0),
-	nagroda			 NUMBER(10, 2),
     druzyna_id       NUMBER(3, 0) NOT NULL,
-    druzynowe_id	 NUMBER(3, 0) NOT NULL
+    druzynowe_id	 NUMBER(3, 0) NOT NULL,
+	wynik            NUMBER(3, 0),
+	nagroda			 NUMBER(10, 2),
+	procent_puli	 NUMBER(3, 1)
 );
 
 ALTER TABLE udzialy_druzynowe
@@ -138,9 +139,11 @@ ALTER TABLE udzialy_druzynowe
                                                       druzynowe_id);
 
 CREATE TABLE udzialy_indywidualne (
-    wynik               NUMBER(3, 0),
-    indywidualne_id		NUMBER(3, 0),
-    zawodnik_pseudonim  VARCHAR2(50) NOT NULL
+    indywidualne_id		NUMBER(3, 0) NOT NULL,
+    zawodnik_pseudonim  VARCHAR2(50) NOT NULL,
+	wynik            NUMBER(3, 0),
+	nagroda			 NUMBER(10, 2),
+	procent_puli	 NUMBER(3, 1)
 );
 
 ALTER TABLE udzialy_indywidualne
@@ -153,7 +156,7 @@ CREATE TABLE zawodnicy (
     nazwisko        VARCHAR2(50) NOT NULL,
     kraj            VARCHAR2(50) NOT NULL,
     data_urodzenia  DATE NOT NULL,
-    placa           NUMBER(6, 2),
+    placa           NUMBER(8, 2),
     druzyna_id      NUMBER(3, 0) NOT NULL
 );
 
