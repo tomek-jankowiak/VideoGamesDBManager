@@ -18,8 +18,17 @@ CREATE OR REPLACE PACKAGE Menadzer AS
 		
 	PROCEDURE ZarejestrujUdzialDruzynowy(
 		id_druzyny IN druzyny.id%TYPE,
-		nazwa_m IN mistrzostwa_druzynowe.nazwa%TYPE,
-		data_m IN mistrzostwa_druzynowe.data%TYPE);
+		druzynowe_id IN mistrzostwa.id%TYPE);
+		
+	PROCEDURE UsunZawodnika(
+        nick IN zawodnicy.pseudonim%TYPE);
+        
+    PROCEDURE ModyfikujZawodnika(
+        nick IN zawodnicy.pseudonim%TYPE,
+        nowa_placa IN zawodnicy.placa%TYPE);
+		
+	FUNCTION PobierzIdDruzyny
+		RETURN NUMBER;
 		
 END Menadzer;
 /
@@ -53,11 +62,39 @@ CREATE OR REPLACE PACKAGE BODY Menadzer AS
 	
 	PROCEDURE ZarejestrujUdzialDruzynowy(
 		id_druzyny IN druzyny.id%TYPE,
-		nazwa_m IN mistrzostwa_druzynowe.nazwa%TYPE,
-		data_m IN mistrzostwa_druzynowe.data%TYPE) AS
+		druzynowe_id IN mistrzostwa.id%TYPE) AS
 	BEGIN
-		INSERT INTO udzialy_druzynowe(druzynowe_nazwa, druzynowe_data, druzyna_id)
-					VALUES(nazwa_m, data_m, id_druzyny);
+		INSERT INTO udzialy_druzynowe(druzyna_id, druzynowe_id)
+					VALUES(id_druzyny, druzynowe_id);
+	END;
+	
+	PROCEDURE ModyfikujZawodnika(
+        nick IN zawodnicy.pseudonim%TYPE,
+        nowa_placa IN zawodnicy.placa%TYPE) AS
+    BEGIN
+        UPDATE zawodnicy
+            SET placa = nowa_placa
+            WHERE pseudonim = nick;
+    END;
+    
+    PROCEDURE UsunZawodnika(
+		nick IN zawodnicy.pseudonim%TYPE) AS
+    BEGIN
+        DELETE FROM zawodnicy WHERE nick = pseudonim;
+    END;
+	
+	FUNCTION PobierzIdDruzyny
+		RETURN NUMBER AS
+		vId druzyny.id%TYPE;
+	BEGIN
+		SELECT id
+		INTO vId
+		FROM druzyny
+		WHERE menadzer = (SELECT nazwa_uzytkownika
+						  FROM uzytkownicy
+                          WHERE id = USER
+                          );
+		RETURN vId;
 	END;
 
 END Menadzer;
@@ -65,35 +102,206 @@ END Menadzer;
 
 CREATE OR REPLACE PACKAGE Organizator AS
 	PROCEDURE NoweMistrzostwa(
-		nazwa IN mistrzostwa.nazwa%TYPE,
-		data IN mistrzostwa.data%TYPE,
-		organizator IN mistrzostwa.organizator%TYPE,
-		lokalizacja IN mistrzostwa.lokalizacja%TYPE,
-		typ IN CHAR,
-		gra IN gry.tytul%TYPE,
-		nagroda IN mistrzostwa.nagroda%TYPE DEFAULT NULL);
+		pNazwa IN mistrzostwa.nazwa%TYPE,
+		pData_begin IN mistrzostwa.data_begin%TYPE,
+		pData_end IN mistrzostwa.data_end%TYPE,
+		pOrganizator IN mistrzostwa.organizator%TYPE,
+		pLokalizacja IN mistrzostwa.lokalizacja%TYPE,
+		pTyp IN mistrzostwa.typ%TYPE,
+		pGra IN gry.tytul%TYPE,
+		pNagroda IN mistrzostwa.nagroda%TYPE DEFAULT NULL);
+		
+	PROCEDURE EdytujMistrzostwa(
+		pId IN mistrzostwa.id%TYPE,
+		pNazwa IN mistrzostwa.nazwa%TYPE,
+		pData_begin IN mistrzostwa.data_begin%TYPE,
+		pData_end IN mistrzostwa.data_end%TYPE,
+		pLokalizacja IN mistrzostwa.lokalizacja%TYPE,
+		pTyp IN mistrzostwa.typ%TYPE,
+		pNagroda IN mistrzostwa.nagroda%TYPE,
+		pStatus IN mistrzostwa.status%TYPE);
+		
+	PROCEDURE DodajWynikDruzynowy(
+		pId_m IN udzialy_druzynowe.druzynowe_id%TYPE,
+		pId_d IN udzialy_druzynowe.druzyna_id%TYPE,
+		pWynik IN udzialy_druzynowe.wynik%TYPE,
+		pProcent IN udzialy_druzynowe.procent_puli%TYPE);
+		
+	PROCEDURE DodajWynikIndywidualny(
+		pId_m IN udzialy_indywidualne.indywidualne_id%TYPE,
+		pPseudonim IN udzialy_indywidualne.zawodnik_pseudonim%TYPE,
+		pWynik IN udzialy_indywidualne.wynik%TYPE,
+		pProcent IN udzialy_indywidualne.procent_puli%TYPE);
+		
+	FUNCTION PobierzNazweOrganizatora
+		RETURN VARCHAR2;
+		
+	FUNCTION PobierzLiczbeMistrzostw
+		RETURN NUMBER;
+		
+	FUNCTION PobierzSumeNagrod
+		RETURN NUMBER;
+		
+	FUNCTION PobierzNazweDruzyny(
+		pIdDruzyny IN druzyny.id%TYPE)
+		RETURN VARCHAR2;
 		
 END Organizator;
 /
 
 CREATE OR REPLACE PACKAGE BODY Organizator AS
 	PROCEDURE NoweMistrzostwa(
-		nazwa IN mistrzostwa.nazwa%TYPE,
-		data IN mistrzostwa.data%TYPE,
-		organizator IN mistrzostwa.organizator%TYPE,
-		lokalizacja IN mistrzostwa.lokalizacja%TYPE,
-		typ IN CHAR,
-		gra IN gry.tytul%TYPE,
-		nagroda IN mistrzostwa.nagroda%TYPE DEFAULT NULL) AS
-	BEGIN 
-		INSERT INTO mistrzostwa VALUES(nazwa, data, organizator, lokalizacja, nagroda, gra);
-		IF typ = 'i' THEN
-			INSERT INTO mistrzostwa_indywidualne VALUES(nazwa, data);
-		ELSIF typ = 'd' THEN
-			INSERT INTO mistrzostwa_druzynowe VALUES(nazwa, data);
+		pNazwa IN mistrzostwa.nazwa%TYPE,
+		pData_begin IN mistrzostwa.data_begin%TYPE,
+		pData_end IN mistrzostwa.data_end%TYPE,
+		pOrganizator IN mistrzostwa.organizator%TYPE,
+		pLokalizacja IN mistrzostwa.lokalizacja%TYPE,
+		pTyp IN mistrzostwa.typ%TYPE,
+		pGra IN gry.tytul%TYPE,
+		pNagroda IN mistrzostwa.nagroda%TYPE DEFAULT NULL) AS
+		vId mistrzostwa.id%TYPE;
+		vStatus mistrzostwa.status%TYPE;
+	BEGIN
+		vId := id_mistrzostw_SEQ.NEXTVAL;
+		
+		IF CURRENT_DATE - pData_begin < 0 THEN
+			vStatus := 'przed rozpoczęciem';
+		ELSIF pData_end IS NOT NULL THEN
+			IF CURRENT_DATE - pData_end < 0 THEN
+				vStatus := 'trwają';
+			ELSE
+				vStatus := 'zakończone';
+			END IF;
+		ELSE
+			vStatus := 'trwają';
+		END IF;
+		
+		INSERT INTO mistrzostwa 
+		VALUES(vId, pNazwa, pData_begin, pData_end, pOrganizator, 
+				pLokalizacja, pTyp, pNagroda, pGra, vStatus);
+		
+		IF pTyp = 'Indywidualne' THEN
+			INSERT INTO mistrzostwa_indywidualne VALUES(vId);
+		ELSIF pTyp = 'Drużynowe' THEN
+			INSERT INTO mistrzostwa_druzynowe VALUES(vId);
 		END IF;
 	END;
+	
+	PROCEDURE EdytujMistrzostwa(
+		pId IN mistrzostwa.id%TYPE,
+		pNazwa IN mistrzostwa.nazwa%TYPE,
+		pData_begin IN mistrzostwa.data_begin%TYPE,
+		pData_end IN mistrzostwa.data_end%TYPE,
+		pLokalizacja IN mistrzostwa.lokalizacja%TYPE,
+		pTyp IN mistrzostwa.typ%TYPE,
+		pNagroda IN mistrzostwa.nagroda%TYPE,
+		pStatus IN mistrzostwa.status%TYPE) AS
+	BEGIN		
+		UPDATE mistrzostwa
+		SET nazwa = pNazwa,
+			data_begin = pData_begin,
+			data_end = pData_end,
+			lokalizacja = pLokalizacja,
+			nagroda = pNagroda,
+			status = pStatus
+		WHERE id = pId;
+	END;
+	
+	PROCEDURE DodajWynikDruzynowy(
+		pId_m IN udzialy_druzynowe.druzynowe_id%TYPE,
+		pId_d IN udzialy_druzynowe.druzyna_id%TYPE,
+		pWynik IN udzialy_druzynowe.wynik%TYPE,
+		pProcent IN udzialy_druzynowe.procent_puli%TYPE) AS
+		vPula mistrzostwa.nagroda%TYPE;
+		vNagroda udzialy_druzynowe.nagroda%TYPE;
+	BEGIN
+		SELECT nagroda
+		INTO vPula
+		FROM mistrzostwa
+		WHERE id = pId_m;
+		
+		vNagroda := pProcent / 100 * vPula;
+		
+		UPDATE udzialy_druzynowe
+		SET wynik = pWynik,
+			nagroda = vNagroda,
+			procent_puli = pProcent
+		WHERE druzynowe_id = pId_m AND druzyna_id = pId_d;
+	END;
+	
+	PROCEDURE DodajWynikIndywidualny(
+		pId_m IN udzialy_indywidualne.indywidualne_id%TYPE,
+		pPseudonim IN udzialy_indywidualne.zawodnik_pseudonim%TYPE,
+		pWynik IN udzialy_indywidualne.wynik%TYPE,
+		pProcent IN udzialy_indywidualne.procent_puli%TYPE) AS
+		vPula mistrzostwa.nagroda%TYPE;
+		vNagroda udzialy_druzynowe.nagroda%TYPE;
+	BEGIN
+		SELECT nagroda
+		INTO vPula
+		FROM mistrzostwa
+		WHERE id = pId_m;
+		
+		vNagroda := pProcent / 100 * vPula;
+		
+		UPDATE udzialy_indywidualne
+		SET wynik = pWynik,
+			nagroda = vNagroda,
+			procent_puli = pProcent
+		WHERE indywidualne_id = pId_m AND zawodnik_pseudonim = pPseudonim;
+	END;
+		
+		
+	FUNCTION PobierzNazweOrganizatora
+		RETURN VARCHAR2 AS
+		vNazwa uzytkownicy.nazwa_uzytkownika%TYPE;
+	BEGIN
+		SELECT nazwa_uzytkownika
+		INTO vNazwa
+		FROM uzytkownicy
+		WHERE id = USER;
+		RETURN vNazwa;
+	END;
 
+	FUNCTION PobierzLiczbeMistrzostw
+		RETURN NUMBER AS
+		vLiczba NUMBER;
+	BEGIN
+		SELECT COUNT(*)
+		INTO vLiczba
+		FROM mistrzostwa
+		WHERE organizator = (SELECT nazwa_uzytkownika
+							 FROM uzytkownicy
+							 WHERE id = USER);
+		RETURN vLiczba;
+	END;
+	
+	FUNCTION PobierzSumeNagrod
+		RETURN NUMBER AS
+		vSuma NUMBER;
+	BEGIN
+		SELECT SUM(nagroda)
+		INTO vSuma
+		FROM mistrzostwa
+		GROUP BY organizator HAVING(organizator = (
+								SELECT nazwa_uzytkownika
+								FROM uzytkownicy
+								WHERE id = USER));
+		RETURN vSuma;
+	END;
+
+	FUNCTION PobierzNazweDruzyny(
+		pIdDruzyny IN druzyny.id%TYPE)
+		RETURN VARCHAR2 AS
+		vNazwa druzyny.nazwa%TYPE;
+	BEGIN
+		SELECT nazwa
+		INTO vNazwa
+		FROM druzyny
+		WHERE id = pIdDruzyny;
+		RETURN vNazwa;
+	END;
+		
 END Organizator;
 /
 

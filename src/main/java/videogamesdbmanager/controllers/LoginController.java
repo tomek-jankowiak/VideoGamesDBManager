@@ -4,6 +4,7 @@ package videogamesdbmanager.controllers;
 import videogamesdbmanager.application.Application;
 import videogamesdbmanager.components.frames.ceo.CeoMainFrame;
 import videogamesdbmanager.components.frames.manager.ManagerMainFrame;
+import videogamesdbmanager.components.frames.organizer.OrganizerMainFrame;
 import videogamesdbmanager.components.frames.roles.RoleSelection;
 import videogamesdbmanager.error.SqlExceptionHandler;
 
@@ -61,6 +62,12 @@ public class LoginController {
             SwingUtilities.invokeLater(() -> {
               JFrame managerMainFrame = new ManagerMainFrame(connection_);
               managerMainFrame.setVisible(true);
+            });
+            break;
+          case "ORGANIZATOR":
+            SwingUtilities.invokeLater(() -> {
+              JFrame organizerMainFrame = new OrganizerMainFrame(connection_);
+              organizerMainFrame.setVisible(true);
             });
             break;
         }
