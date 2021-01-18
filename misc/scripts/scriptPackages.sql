@@ -447,7 +447,11 @@ CREATE OR REPLACE PACKAGE BODY Prezes AS
 		studio IN pracownicy_studia.studio_nazwa%TYPE,
 		data_zatrudnienia IN pracownicy_studia.data_zatrudnienia%TYPE DEFAULT SYSDATE,
 		dzial IN pracownicy_studia.dzial%TYPE DEFAULT NULL) AS
-	BEGIN		
+	BEGIN
+		IF pPlaca IS NULL OR pPlaca <= 0 THEN
+			RAISE_APPLICATION_ERROR(-20303, 'Płaca musi być większa od 0!');
+		END IF;
+		
 		INSERT INTO pracownicy_studia 
 				VALUES(pesel, imie, nazwisko, placa, data_zatrudnienia, dzial, studio);
 				

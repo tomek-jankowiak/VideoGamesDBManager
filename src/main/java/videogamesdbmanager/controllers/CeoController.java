@@ -124,11 +124,7 @@ public class CeoController {
       preparedStatement.setString(1, pesel);
       preparedStatement.setString(2, name);
       preparedStatement.setString(3, surname);
-      if (!salary.isEmpty()) {
-        preparedStatement.setDouble(4, Double.parseDouble(salary));
-      } else {
-        preparedStatement.setString(4, null);
-      }
+      preparedStatement.setString(4, salary);
       preparedStatement.setString(5, company);
       preparedStatement.setString(6, empDate);
       preparedStatement.setString(7, department);
@@ -138,10 +134,6 @@ public class CeoController {
       return true;
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);
-      return false;
-    } catch (NumberFormatException ex) {
-      JOptionPane.showMessageDialog(null,
-              "Niepoprawny format liczbowy", "Błąd", JOptionPane.ERROR_MESSAGE);
       return false;
     }
   }
@@ -157,11 +149,7 @@ public class CeoController {
         )
       );
       preparedStatement.setString(1, pesel);
-      if (!salary.isEmpty()) {
-        preparedStatement.setDouble(2, Double.parseDouble(salary));
-      } else {
-        preparedStatement.setString(2, null);
-      }
+      preparedStatement.setString(2, salary);
       preparedStatement.setString(3, department);
       preparedStatement.execute();
       preparedStatement.close();
@@ -293,31 +281,15 @@ public class CeoController {
       preparedStatement.setString(2, releaseDate);
       preparedStatement.setString(3, gameType);
       preparedStatement.setString(4, company);
-      if (!ageCat.isEmpty()) {
-        preparedStatement.setInt(5, Integer.parseInt(ageCat));
-      } else {
-        preparedStatement.setString(5, null);
-      }
-      if (!boxOffice.isEmpty()) {
-        preparedStatement.setDouble(6, Double.parseDouble(boxOffice));
-      } else {
-        preparedStatement.setString(6, null);
-      }
-      if (!budget.isEmpty()) {
-        preparedStatement.setDouble(7, Double.parseDouble(budget));
-      } else {
-        preparedStatement.setString(7, null);
-      }
+      preparedStatement.setString(5, ageCat);
+      preparedStatement.setString(6, boxOffice);
+      preparedStatement.setString(7, budget);
       preparedStatement.execute();
       preparedStatement.close();
 
       return true;
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);
-      return false;
-    } catch (NumberFormatException ex) {
-      JOptionPane.showMessageDialog(null,
-              "Niepoprawny format liczbowy!", "Błąd", JOptionPane.ERROR_MESSAGE);
       return false;
     }
   }
