@@ -16,6 +16,9 @@ public class SqlExceptionHandler {
       case 1400:
         msg = "Wymagane pole nie może być puste";
         break;
+      case 1839:
+        msg = "Niepoprawna data";
+        break;
       case 1861:
         msg = "Niepoprawny format daty (powinien być \"DD-MM-YYYY\")";
         break;
