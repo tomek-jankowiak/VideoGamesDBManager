@@ -21,7 +21,9 @@ public class ChampionshipDetailsFrame extends JFrame {
   private JTextField gameField;
   private JButton confirmButton;
   private JButton editButton;
+  private JButton resultButton;
   private JComboBox<String> statusComboBox;
+
 
   private final OrganizerController controller_;
 
@@ -43,6 +45,7 @@ public class ChampionshipDetailsFrame extends JFrame {
 
     editButton.addActionListener(e -> onEdit());
     confirmButton.addActionListener(e -> onConfirm());
+    resultButton.addActionListener(e -> onResult());
     closeButton.addActionListener(e -> onClose());
 
     setTextFields(championshipsId);
@@ -92,6 +95,13 @@ public class ChampionshipDetailsFrame extends JFrame {
             Objects.requireNonNull(statusComboBox.getSelectedItem()).toString())) {
       JOptionPane.showMessageDialog(null, "Zmodyfikowano mistrzostwa.");
     }
+  }
+
+  private void onResult() {
+    SwingUtilities.invokeLater(() -> {
+      ParticipantsListFrame teamsFrame = new ParticipantsListFrame(controller_, idField.getText(), typeField.getText());
+      teamsFrame.setVisible(true);
+    });
   }
 
   private void onClose() {

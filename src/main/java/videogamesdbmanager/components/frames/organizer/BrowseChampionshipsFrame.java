@@ -13,6 +13,8 @@ public class BrowseChampionshipsFrame extends JFrame {
   private JTable championshipsTable;
   private JButton closeButton;
   private JButton refreshButton;
+  private JRadioButton ownRadioButton;
+  private JRadioButton allRadioButton;
 
   private final OrganizerController controller_;
 
@@ -26,6 +28,10 @@ public class BrowseChampionshipsFrame extends JFrame {
     this.setLocationRelativeTo(null);
     this.pack();
 
+    ButtonGroup buttonGroup = new ButtonGroup();
+    buttonGroup.add(allRadioButton);
+    buttonGroup.add(ownRadioButton);
+
     refreshChampionshipsTable();
 
     this.addWindowListener(new WindowAdapter() {
@@ -34,6 +40,8 @@ public class BrowseChampionshipsFrame extends JFrame {
       }
     });
 
+    allRadioButton.addActionListener(e -> refreshChampionshipsTable());
+    ownRadioButton.addActionListener(e -> refreshChampionshipsTable());
     refreshButton.addActionListener(e -> refreshChampionshipsTable());
     closeButton.addActionListener(e -> onClose());
 
@@ -47,7 +55,7 @@ public class BrowseChampionshipsFrame extends JFrame {
     model.setRowCount(0);
     model.setColumnIdentifiers(columnNames);
 
-    controller_.setChampionshipsTable(model);
+    controller_.setChampionshipsTable(model, ownRadioButton.isSelected());
     championshipsTable.setModel(model);
   }
 
