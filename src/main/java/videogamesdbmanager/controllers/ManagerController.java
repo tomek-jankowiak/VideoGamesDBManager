@@ -34,7 +34,7 @@ public class ManagerController {
       Statement statement = connection_.createStatement();
       return statement.executeQuery(
               String.format(
-                      "SELECT * " +
+                      "SELECT pseudonim, imie, nazwisko, kraj, TO_CHAR(data_urodzenia, 'yyyy-MM-dd'), placa " +
                               "FROM %s.zawodnicy " +
                               "WHERE druzyna_id = '%d'",
                       Application.ownerID, team_id_
@@ -205,9 +205,6 @@ public class ManagerController {
 
     try {
       Statement statement = connection_.createStatement();
-      System.out.println(String.format("SELECT id, nazwa, gra_tytul, typ, nagroda, status " +
-                      "FROM %s.mistrzostwa %s ;",
-              Application.ownerID, filter));
       return statement.executeQuery(
               String.format("SELECT id, nazwa, gra_tytul, typ, nagroda, status " +
                               "FROM %s.mistrzostwa %s",
@@ -284,6 +281,40 @@ public class ManagerController {
       } catch (SQLException ex) {
         SqlExceptionHandler.handle(ex);
       }
+    }
+  }
+
+  public void signUpTeam(String champ_id) {
+    try {
+      Statement statement = connection_.createStatement();
+      statement.execute(
+              String.format(
+                      "BEGIN " +
+                              "%s.Menadzer.ZarejestrujUdzialDruzynowy(%s, %s);" +
+                              "END;",
+                      Application.ownerID, team_id_, champ_id
+              )
+      );
+      statement.close();
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
+    }
+  }
+
+  public void signUpPlayer(String pseudonym, String champ_id) {
+    try {
+      Statement statement = connection_.createStatement();
+      statement.execute(
+              String.format(
+                      "BEGIN " +
+                              "%s.Menadzer.ZarejestrujUdzialZawodnika(%s, %s);" +
+                              "END;",
+                      Application.ownerID, pseudonym, champ_id
+              )
+      );
+      statement.close();
+    } catch (SQLException ex) {
+      SqlExceptionHandler.handle(ex);
     }
   }
 

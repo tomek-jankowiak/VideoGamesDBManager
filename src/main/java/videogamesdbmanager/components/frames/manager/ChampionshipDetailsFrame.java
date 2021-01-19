@@ -1,12 +1,10 @@
 package videogamesdbmanager.components.frames.manager;
 
-import videogamesdbmanager.components.frames.manager.ParticipantsListFrame;
 import videogamesdbmanager.controllers.ManagerController;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Objects;
 
 public class ChampionshipDetailsFrame extends JFrame {
   private JPanel mainPanel;
@@ -18,11 +16,12 @@ public class ChampionshipDetailsFrame extends JFrame {
   private JTextField localizationField;
   private JTextField prizeField;
   private JTextField gameField;
-  private JComboBox statusComboBox;
+  private JTextField statusField;
   private JTextField typeField;
   private JTextField idField;
   private JButton resultButton;
   private JButton signUpButton;
+  //private JTextField statusTextField;
 
 
   private final ManagerController controller_;
@@ -48,6 +47,13 @@ public class ChampionshipDetailsFrame extends JFrame {
     closeButton.addActionListener(e -> onClose());
 
     setTextFields(championshipsId);
+
+    if (statusField.getText().equals("przed rozpoczęciem")){
+      signUpButton.setEnabled(true);
+    }
+    else{
+      signUpButton.setEnabled(false);
+    }
   }
 
 
@@ -63,11 +69,25 @@ public class ChampionshipDetailsFrame extends JFrame {
     typeField.setText(championshipsParams[5]);
     prizeField.setText(championshipsParams[6]);
     gameField.setText(championshipsParams[7]);
-    statusComboBox.setSelectedItem(championshipsParams[8]);
+    statusField.setText(championshipsParams[8]);
   }
 
   private void onSignUp() {
-    //TODO
+    if (typeField.getText().equals("Drużynowe")) {
+      int input = JOptionPane.showConfirmDialog(null,
+              "Czy na pewno chcesz zapisać drużynę na te mistrzostwa?",
+              "Potwierdź decyzję", JOptionPane.YES_NO_OPTION);
+
+      if (input == 0) {
+        controller_.signUpTeam(idField.getText());
+      }
+    }
+    else if (typeField.getText().equals("Indywidualne")) {
+      SwingUtilities.invokeLater(() -> {
+        SignUpParticipantFrame participantFrame = new SignUpParticipantFrame(controller_, idField.getText());
+        participantFrame.setVisible(true);
+      });
+    }
   }
 
   private void onResult() {
