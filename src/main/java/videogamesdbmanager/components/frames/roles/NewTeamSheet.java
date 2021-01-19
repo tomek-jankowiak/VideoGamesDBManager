@@ -1,6 +1,7 @@
 package videogamesdbmanager.components.frames.roles;
 
 import videogamesdbmanager.application.Application;
+import videogamesdbmanager.components.frames.manager.ManagerMainFrame;
 import videogamesdbmanager.components.frames.manager.NewRegionFrame;
 import videogamesdbmanager.controllers.NewUserController;
 import videogamesdbmanager.error.SqlExceptionHandler;
