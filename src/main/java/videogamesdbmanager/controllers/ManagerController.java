@@ -286,16 +286,19 @@ public class ManagerController {
 
   public void signUpTeam(String champ_id) {
     try {
-      Statement statement = connection_.createStatement();
-      statement.execute(
+      PreparedStatement preparedStatement = connection_.prepareStatement(
               String.format(
                       "BEGIN " +
-                              "%s.Menadzer.ZarejestrujUdzialDruzynowy(%s, %s);" +
+                              "%s.Menadzer.ZarejestrujUdzialDruzynowy(?, ?);" +
                               "END;",
-                      Application.ownerID, team_id_, champ_id
+                      Application.ownerID
               )
       );
-      statement.close();
+      preparedStatement.setInt(1, team_id_);
+      preparedStatement.setString(2, champ_id);
+      preparedStatement.execute();
+      preparedStatement.close();
+
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);
     }
@@ -303,16 +306,19 @@ public class ManagerController {
 
   public void signUpPlayer(String pseudonym, String champ_id) {
     try {
-      Statement statement = connection_.createStatement();
-      statement.execute(
+      PreparedStatement preparedStatement = connection_.prepareStatement(
               String.format(
                       "BEGIN " +
-                              "%s.Menadzer.ZarejestrujUdzialZawodnika(%s, %s);" +
+                              "%s.Menadzer.ZarejestrujUdzialZawodnika(?, ?);" +
                               "END;",
-                      Application.ownerID, pseudonym, champ_id
+                      Application.ownerID
               )
       );
-      statement.close();
+      preparedStatement.setString(1, pseudonym);
+      preparedStatement.setString(2, champ_id);
+      preparedStatement.execute();
+      preparedStatement.close();
+
     } catch (SQLException ex) {
       SqlExceptionHandler.handle(ex);
     }

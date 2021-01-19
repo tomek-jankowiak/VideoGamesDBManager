@@ -69,7 +69,7 @@ public class SignUpParticipantFrame extends JFrame {
               "Potwierdź decyzję", JOptionPane.YES_NO_OPTION);
 
       if (input == 0) {
-        controller_.signUpPlayer(playerParams[2], champ_id_);
+        controller_.signUpPlayer(playerParams[0], champ_id_);
       }
     }
   }
