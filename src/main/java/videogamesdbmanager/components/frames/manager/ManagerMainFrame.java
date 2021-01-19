@@ -29,7 +29,7 @@ public class ManagerMainFrame extends JFrame {
     controller_ = new ManagerController(connection);
 
     manageMembersButton.addActionListener(e -> onManage());
-    applyToChampsButton.addActionListener(e -> onApply());
+    //applyToChampsButton.addActionListener(e -> onApply());
     deleteAccountButton.addActionListener(e -> onDelete());
     champsButton.addActionListener(e -> onChamps());
     logoutButton.addActionListener(e -> onClose());
@@ -48,11 +48,14 @@ public class ManagerMainFrame extends JFrame {
   }
 
   private void onChamps() {
-    //TODO
+    SwingUtilities.invokeLater(() -> {
+      JFrame champsFrame = new ChampionshipsFrame(controller_);
+      champsFrame.setVisible(true);
+    });
   }
 
   private void onApply() {
-    //TODO
+    //NOTTODO
   }
 
   private void onDelete() {
