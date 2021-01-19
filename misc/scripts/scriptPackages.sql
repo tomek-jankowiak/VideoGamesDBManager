@@ -16,6 +16,10 @@ CREATE OR REPLACE PACKAGE Menadzer AS
 	PROCEDURE NowyRegion(
 		nazwa IN regiony.nazwa_regionu%TYPE);
 		
+	PROCEDURE ZarejestrujUdzialZawodnika(
+		pseudonim IN zawodnicy.pseudonim%TYPE,
+		indywidualne_id IN mistrzostwa.id%TYPE);
+
 	PROCEDURE ZarejestrujUdzialDruzynowy(
 		id_druzyny IN druzyny.id%TYPE,
 		druzynowe_id IN mistrzostwa.id%TYPE);
@@ -82,10 +86,22 @@ CREATE OR REPLACE PACKAGE BODY Menadzer AS
 	BEGIN
 		INSERT INTO udzialy_druzynowe(druzyna_id, druzynowe_id)
 					VALUES(id_druzyny, druzynowe_id);
-		
+
 	EXCEPTION
 		WHEN DUP_VAL_ON_INDEX THEN
 			RAISE_APPLICATION_ERROR(-20105, 'Uczestnik jest już zgłoszony na te zawody!');
+	END;
+    
+	PROCEDURE ZarejestrujUdzialZawodnika(
+		pseudonim IN zawodnicy.pseudonim%TYPE,
+		indywidualne_id IN mistrzostwa.id%TYPE) AS
+	BEGIN
+		INSERT INTO udzialy_indywidualne(zawodnik_pseudonim, indywidualne_id)
+					VALUES(pseudonim, indywidualne_id);
+
+	EXCEPTION
+		WHEN DUP_VAL_ON_INDEX THEN
+			RAISE_APPLICATION_ERROR(-2015, 'Uczestnik jest już zgłoszony na te zawody!');
 	END;
 	
 	PROCEDURE ModyfikujZawodnika(
