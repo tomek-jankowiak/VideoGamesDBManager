@@ -1,21 +1,24 @@
 package videogamesdbmanager.components.frames.ceo;
 
+import videogamesdbmanager.components.elements.FilterComboBox;
 import videogamesdbmanager.controllers.CeoController;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.List;
 import java.util.Objects;
 
 public class ReleaseGameFrame extends JFrame {
   private JPanel mainPanel;
   private JTextField titleTextField;
   private JTextField releaseDateTextField;
-  private JComboBox<String> typeComboBox;
+  private FilterComboBox typeComboBox;
   private JTextField ageCatTextField;
   private JTextField budgetTextField;
   private JTextField boxOfficeTextField;
   private JButton releaseButton;
+  private JPanel typesPanel;
 
   private final CeoController controller_;
 
@@ -24,7 +27,7 @@ public class ReleaseGameFrame extends JFrame {
 
     controller_ = controller;
 
-    fillComboBox();
+    setupGameTypes();
     releaseDateTextField.setText(controller.getSysdate());
     this.setContentPane(mainPanel);
     this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -47,9 +50,15 @@ public class ReleaseGameFrame extends JFrame {
     typeComboBox.addItem("<NOWY GATUNEK>");
   }
 
-  private void fillComboBox() {
-    controller_.setGameTypesComboBox(typeComboBox);
-    typeComboBox.addItem("<NOWY GATUNEK>");
+  private void setupGameTypes() {
+    List<String> gameTypes = controller_.getGameTypesList();
+    gameTypes.add("<NOWY GATUNEK>");
+    typeComboBox = new FilterComboBox(gameTypes);
+    for (String gameType : gameTypes) {
+      typeComboBox.addItem(gameType);
+    }
+    typeComboBox.setSelectedIndex(0);
+    typesPanel.add(typeComboBox);
   }
 
   private void onTypeChoose() {
@@ -76,5 +85,9 @@ public class ReleaseGameFrame extends JFrame {
 
   private void onClose() {
     this.dispose();
+  }
+
+  private void createUIComponents() {
+    typesPanel = new JPanel();
   }
 }

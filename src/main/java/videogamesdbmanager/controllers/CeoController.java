@@ -9,6 +9,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.desktop.AppForegroundListener;
 import java.sql.*;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CeoController {
 
@@ -227,16 +229,20 @@ public class CeoController {
     }
   }
 
-  public void setGameTypesComboBox(JComboBox<String> comboBox) {
-    try {
-      ResultSet types = getGameTypes();
-
-      while(types.next()) {
-        comboBox.addItem(types.getString(1));
+  public List<String> getGameTypesList() {
+    ResultSet types = getGameTypes();
+    List<String> typeList = new ArrayList<>();
+    if (types != null) {
+      try {
+        while (types.next()) {
+          typeList.add(types.getString(1));
+        }
+        return typeList;
+      } catch (SQLException ex) {
+        SqlExceptionHandler.handle(ex);
       }
-    } catch (SQLException ex) {
-      SqlExceptionHandler.handle(ex);
     }
+    return null;
   }
 
   public boolean addGameType(String typeName, String superType) {

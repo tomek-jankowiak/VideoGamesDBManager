@@ -64,14 +64,6 @@ CREATE TABLE gry (
 
 ALTER TABLE gry ADD CONSTRAINT gry_pk PRIMARY KEY ( tytul );
 
-CREATE TABLE gry_na_platformach (
-    gra_tytul                  VARCHAR2(50) NOT NULL,
-    platforma_nazwa_platformy  VARCHAR2(40) NOT NULL
-);
-
-ALTER TABLE gry_na_platformach ADD CONSTRAINT gry_na_platformach_pk PRIMARY KEY ( gra_tytul,
-                                                                                platforma_nazwa_platformy );
-
 CREATE TABLE mistrzostwa_indywidualne (
     id	NUMBER(3, 0)
 );
@@ -93,13 +85,6 @@ CREATE TABLE mistrzostwa (
 
 ALTER TABLE mistrzostwa ADD CONSTRAINT mistrzostwa_pk PRIMARY KEY ( id );
 																	
-
-CREATE TABLE platformy (
-    nazwa_platformy VARCHAR2(40) NOT NULL
-);
-
-ALTER TABLE platformy ADD CONSTRAINT platformy_pk PRIMARY KEY ( nazwa_platformy );
-
 CREATE TABLE pracownicy_studia (
     pesel              VARCHAR2(11) NOT NULL,
     imie               VARCHAR2(50) NOT NULL,
@@ -184,14 +169,6 @@ ALTER TABLE gry
     ADD CONSTRAINT gra_gatunek_fk FOREIGN KEY ( nazwa_gatunku )
         REFERENCES gatunki ( nazwa_gatunku );
 
-ALTER TABLE gry_na_platformach
-    ADD CONSTRAINT gra_na_platformie_gra_fk FOREIGN KEY ( gra_tytul )
-        REFERENCES gry ( tytul );
-
-ALTER TABLE gry_na_platformach
-    ADD CONSTRAINT gra_na_platformie_platforma_fk FOREIGN KEY ( platforma_nazwa_platformy )
-        REFERENCES platformy ( nazwa_platformy );
-
 ALTER TABLE gry
     ADD CONSTRAINT gra_studio_fk FOREIGN KEY ( studio_nazwa )
         REFERENCES studia ( nazwa );
@@ -244,17 +221,6 @@ ALTER TABLE zawodnicy
     ADD CONSTRAINT zawodnik_druzyna_fk FOREIGN KEY ( druzyna_id )
         REFERENCES druzyny ( id )
 		ON DELETE CASCADE;
-
-
-CREATE OR REPLACE PROCEDURE ZarejestrujUdzialIndywidualny(
-	pseudonim IN zawodnicy.pseudonim%TYPE,
-	nazwa_m IN mistrzostwa_indywidualne.nazwa%TYPE,
-	data_m IN mistrzostwa_indywidualne.data%TYPE) AS
-BEGIN
-	INSERT INTO udzialy_indywidualne(indywidualne_nazwa, indywidualne_data, zawodnik_pseudonim)
-				VALUES(nazwa_m, data_m, pseudonim);
-END;
-/
 
 CREATE INDEX gra_box_office_idx ON gry(box_office);
 

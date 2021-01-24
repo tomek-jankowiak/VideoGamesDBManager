@@ -1,17 +1,20 @@
 package videogamesdbmanager.components.frames.ceo;
 
+import videogamesdbmanager.components.elements.FilterComboBox;
 import videogamesdbmanager.controllers.CeoController;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.List;
 import java.util.Objects;
 
 public class NewGameTypeFrame extends JFrame {
   private JPanel mainPanel;
   private JTextField typeNameTextField;
   private JButton addButton;
-  private JComboBox<String> supertypeComboBox;
+  private JPanel supertypePanel;
+  private FilterComboBox supertypeComboBox;
 
   private final CeoController controller_;
   private final ReleaseGameFrame parentFrame_;
@@ -22,7 +25,7 @@ public class NewGameTypeFrame extends JFrame {
     controller_ = controller;
     parentFrame_ = parentFrame;
 
-    fillComboBox();
+    setupSupertypes();
     supertypeComboBox.setSelectedItem("<BRAK NADGATUNKU>");
     this.setContentPane(mainPanel);
     this.setLocationRelativeTo(null);
@@ -39,9 +42,15 @@ public class NewGameTypeFrame extends JFrame {
     addButton.addActionListener(e -> onAdd());
   }
 
-  private void fillComboBox() {
-    controller_.setGameTypesComboBox(supertypeComboBox);
-    supertypeComboBox.addItem("<BRAK NADGATUNKU>");
+  private void setupSupertypes() {
+    List<String> gameTypes = controller_.getGameTypesList();
+    gameTypes.add("<BRAK NADGATUNKU>");
+    supertypeComboBox = new FilterComboBox(gameTypes);
+    for (String gameType : gameTypes) {
+      supertypeComboBox.addItem(gameType);
+    }
+    supertypeComboBox.setSelectedIndex(0);
+    supertypePanel.add(supertypeComboBox);
   }
 
   private void onAdd() {
@@ -56,5 +65,9 @@ public class NewGameTypeFrame extends JFrame {
   private void onClose() {
     this.dispose();
     parentFrame_.setVisible(true);
+  }
+
+  private void createUIComponents() {
+    supertypePanel = new JPanel();
   }
 }

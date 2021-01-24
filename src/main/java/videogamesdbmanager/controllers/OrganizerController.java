@@ -6,6 +6,8 @@ import videogamesdbmanager.error.SqlExceptionHandler;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OrganizerController {
   private final Connection connection_;
@@ -215,17 +217,21 @@ public class OrganizerController {
     }
   }
 
-  public void setGamesComboBox(JComboBox<String> comboBox) {
+  public List<String> getGamesList() {
     ResultSet games = getGames();
+    List<String> gamesList = new ArrayList<>();
     if (games != null) {
       try {
         while (games.next()) {
-          comboBox.addItem(games.getString(1));
+          gamesList.add(games.getString(1));
         }
+        games.close();
+        return gamesList;
       } catch (SQLException ex) {
         SqlExceptionHandler.handle(ex);
       }
     }
+    return null;
   }
 
   public void setChampionshipsParams(String championshipsId, String[] championshipsParams) {

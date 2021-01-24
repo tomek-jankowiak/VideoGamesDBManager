@@ -101,7 +101,7 @@ CREATE OR REPLACE PACKAGE BODY Menadzer AS
 
 	EXCEPTION
 		WHEN DUP_VAL_ON_INDEX THEN
-			RAISE_APPLICATION_ERROR(-2015, 'Uczestnik jest już zgłoszony na te zawody!');
+			RAISE_APPLICATION_ERROR(-20105, 'Uczestnik jest już zgłoszony na te zawody!');
 	END;
 	
 	PROCEDURE ModyfikujZawodnika(
@@ -428,10 +428,6 @@ CREATE OR REPLACE PACKAGE Prezes AS
 		box_office IN gry.box_office%TYPE DEFAULT NULL,
 		budzet IN gry.budzet%TYPE DEFAULT NULL);
 		
-	PROCEDURE PrzypiszGreDoPlatformy(
-		tytul IN gry.tytul%TYPE,
-		platforma IN platformy.nazwa_platformy%TYPE);
-		
 	PROCEDURE NowyGatunek(
 		gatunek IN gatunki.nazwa_gatunku%TYPE,
 		nadgatunek IN gatunki.nazwa_nadgatunku%TYPE DEFAULT NULL);
@@ -519,14 +515,7 @@ CREATE OR REPLACE PACKAGE BODY Prezes AS
 		WHEN DUP_VAL_ON_INDEX THEN
 			RAISE_APPLICATION_ERROR(-20304, 'Istnieje już gra o takim tytule!');
 	END;
-	
-	PROCEDURE PrzypiszGreDoPlatformy(
-		tytul IN gry.tytul%TYPE,
-		platforma IN platformy.nazwa_platformy%TYPE) AS
-	BEGIN 
-		INSERT INTO gry_na_platformach VALUES(tytul, platforma);
-	END;
-	
+		
 	PROCEDURE NowyGatunek(
 		gatunek IN gatunki.nazwa_gatunku%TYPE,
 		nadgatunek IN gatunki.nazwa_nadgatunku%TYPE DEFAULT NULL) AS
