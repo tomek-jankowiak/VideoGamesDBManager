@@ -48,7 +48,7 @@ public class AddPlayerFrame extends JFrame {
             surnameTextField.getText(),
             countryTextField.getText(),
             birthDateTextField.getText(),
-            Double.parseDouble(salaryTextField.getText()))
+            salaryTextField.getText())
     ) {
       JOptionPane.showMessageDialog(null, "Dodano pracownika");
       parentFrame_.refreshPlayersTable();

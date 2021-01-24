@@ -56,7 +56,7 @@ public class ModifyPlayerFrame extends JFrame {
 
   private void onModify() {
     String nick = nickTextField.getText();
-    Double salary = Double.parseDouble(salaryTextField.getText());
+    String salary = salaryTextField.getText();
     if (controller_.modifyPlayer(nick, salary)) {
       JOptionPane.showMessageDialog(null, "Zmodyfikowano zawodnika");
       parentFrame_.refreshPlayersTable();

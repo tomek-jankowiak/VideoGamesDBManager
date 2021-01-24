@@ -61,7 +61,7 @@ public class ManagerController {
     }
   }
   public boolean addPlayer(String nick, String name, String surname,
-                             String country, String birthDate, Double salary) {
+                             String country, String birthDate, String salary) {
     System.out.println(team_id_);
     try {
       PreparedStatement preparedStatement = connection_.prepareStatement(
@@ -77,7 +77,7 @@ public class ManagerController {
       preparedStatement.setString(3, surname);
       preparedStatement.setString(4, country);
       preparedStatement.setString(5, birthDate);
-      preparedStatement.setDouble(7, salary);
+      preparedStatement.setString(7, salary);
       preparedStatement.setInt(6, team_id_);
       preparedStatement.execute();
       preparedStatement.close();
@@ -89,7 +89,7 @@ public class ManagerController {
     }
   }
 
-  public boolean modifyPlayer(String nick, Double salary) {
+  public boolean modifyPlayer(String nick, String salary) {
     try {
       PreparedStatement preparedStatement = connection_.prepareStatement(
               String.format(
@@ -100,7 +100,7 @@ public class ManagerController {
               )
       );
       preparedStatement.setString(1, nick);
-      preparedStatement.setDouble(2, salary);
+      preparedStatement.setString(2, salary);
       preparedStatement.execute();
       preparedStatement.close();
 

@@ -11,7 +11,6 @@ import java.sql.Connection;
 public class ManagerMainFrame extends JFrame {
   private JButton deleteAccountButton;
   private JButton manageMembersButton;
-  private JButton applyToChampsButton;
   private JPanel mainPanel;
   private JButton logoutButton;
   private JButton champsButton;
@@ -29,7 +28,6 @@ public class ManagerMainFrame extends JFrame {
     controller_ = new ManagerController(connection);
 
     manageMembersButton.addActionListener(e -> onManage());
-    //applyToChampsButton.addActionListener(e -> onApply());
     deleteAccountButton.addActionListener(e -> onDelete());
     champsButton.addActionListener(e -> onChamps());
     logoutButton.addActionListener(e -> onClose());
@@ -52,10 +50,6 @@ public class ManagerMainFrame extends JFrame {
       JFrame champsFrame = new ChampionshipsFrame(controller_);
       champsFrame.setVisible(true);
     });
-  }
-
-  private void onApply() {
-    //NOTTODO
   }
 
   private void onDelete() {
