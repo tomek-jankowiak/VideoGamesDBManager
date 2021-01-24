@@ -62,7 +62,6 @@ public class ManagerController {
   }
   public boolean addPlayer(String nick, String name, String surname,
                              String country, String birthDate, String salary) {
-    System.out.println(team_id_);
     try {
       PreparedStatement preparedStatement = connection_.prepareStatement(
               String.format(

@@ -50,7 +50,7 @@ public class AddPlayerFrame extends JFrame {
             birthDateTextField.getText(),
             salaryTextField.getText())
     ) {
-      JOptionPane.showMessageDialog(null, "Dodano pracownika");
+      JOptionPane.showMessageDialog(null, "Dodano zawodnika");
       parentFrame_.refreshPlayersTable();
     }
   }
