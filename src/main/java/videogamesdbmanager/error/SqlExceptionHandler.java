@@ -20,6 +20,9 @@ public class SqlExceptionHandler {
         msg = "Podana wartość jest za duża!";
         break;
       case 1839:
+      case 1840:
+      case 1847:
+      case 1858:
         msg = "Niepoprawna data!";
         break;
       case 1861:
